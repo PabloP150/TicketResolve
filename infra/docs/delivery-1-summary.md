@@ -1,7 +1,7 @@
 # Delivery 1 — IaC Workspace Bootstrap & CI Pipeline
 
 **Curso:** Optimizaciones y Performance — PDDS, Galileo
-**Equipo:** _(completar nombres de los 3 integrantes)_
+**Equipo:** Pablo Pineda, Christian Martínez (equipo de 2 — confirmado con instructores)
 **Track:** Standard (no EKS) — CI sobre GitHub Actions
 **Fecha:** 2026-05-10
 
@@ -68,7 +68,7 @@ Terraform will perform the following actions:
   # aws_s3_bucket.bootstrap will be created
   + resource "aws_s3_bucket" "bootstrap" {
       + arn                         = (known after apply)
-      + bucket                      = "ticketresolve-dev-bootstrap-pdds-2026"
+      + bucket                      = "ticketresolve-bucket-dev"
       + bucket_domain_name          = (known after apply)
       + bucket_regional_domain_name = (known after apply)
       + force_destroy               = false
@@ -81,7 +81,7 @@ Terraform will perform the following actions:
           + "Application"  = "ticketresolve"
           + "Architecture" = "x86_64"
           + "Environment"  = "dev"
-          + "Name"         = "ticketresolve-dev-bootstrap-pdds-2026"
+          + "Name"         = "ticketresolve-bucket-dev"
           + "Purpose"      = "delivery-1-bootstrap"
           + "Region"       = "us-east-1"
         }
@@ -91,7 +91,7 @@ Terraform will perform the following actions:
           + "Delivery"     = "oyd-delivery-1"
           + "Environment"  = "dev"
           + "ManagedBy"    = "Terraform"
-          + "Name"         = "ticketresolve-dev-bootstrap-pdds-2026"
+          + "Name"         = "ticketresolve-bucket-dev"
           + "Project"      = "ticketresolve"
           + "Purpose"      = "delivery-1-bootstrap"
           + "Region"       = "us-east-1"
@@ -147,7 +147,7 @@ Todas las variables están definidas en [`infra/variables.tf`](../variables.tf) 
 | `app_name`      | string | _(none)_    | `"ticketresolve"`               | Mismo — el nombre de la aplicación no cambia entre entornos |
 | `region`        | string | `us-east-1` | `"us-east-1"`                   | Podría seguir `us-east-1` o moverse a `us-east-2` por DR    |
 | `architecture`  | string | `x86_64`    | `"x86_64"`                      | `arm64` en prod para reducir costos en Lambda/Graviton (Delivery 2+) |
-| `bucket_name`   | string | _(none)_    | `"bootstrap-pdds-2026"`         | Sufijo distinto para evitar colisión global de nombres S3   |
+| `bucket_name`   | string | _(none)_    | `"ticketresolve-bucket"`        | Base name distinto para evitar colisión global de nombres S3 |
 
 Las cinco variables superan el mínimo de cuatro exigido por el PDF y cubren todas las categorías semánticas requeridas: `environment`, `app_name` (project name), `region`, y `bucket_name` como variable específica al recurso. `architecture` se incluye preventivamente porque será consumida por los módulos de compute en Delivery 2 sin que haya que retocar la firma del workspace.
 

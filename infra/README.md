@@ -94,7 +94,8 @@ terraform destroy -var-file=envs/dev/dev.tfvars
 ```
 
 > **Importante sobre `bucket_name`:** el nombre completo del bucket es
-> `${app_name}-${environment}-${bucket_name}` y debe ser **globalmente único en S3**.
+> `${bucket_name}-${environment}` (con `dev.tfvars` actual queda
+> `ticketresolve-bucket-dev`) y debe ser **globalmente único en S3**.
 > Si el apply falla con `BucketAlreadyExists`, cambia `bucket_name` en
 > `envs/dev/dev.tfvars` a un valor único.
 
@@ -106,7 +107,7 @@ terraform destroy -var-file=envs/dev/dev.tfvars
 | `app_name`      | string   | _(none)_    | Prefijo de nombres y tag `Project`.                                         |
 | `region`        | string   | `us-east-1` | Región de AWS donde se crean los recursos.                                  |
 | `architecture`  | string   | `x86_64`    | CPU arch por defecto para futuros workloads de compute. Se expone como tag. |
-| `bucket_name`   | string   | _(none)_    | Sufijo único para el bucket bootstrap.                                      |
+| `bucket_name`   | string   | _(none)_    | Base name (globalmente único) para el bucket bootstrap.                     |
 
 ## Outputs
 

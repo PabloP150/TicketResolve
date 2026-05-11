@@ -36,7 +36,7 @@ variable "architecture" {
 }
 
 variable "bucket_name" {
-  description = "Globally unique suffix for the bootstrap S3 bucket. The full bucket name is composed as '<app_name>-<environment>-<bucket_name>'. Must satisfy S3 naming rules."
+  description = "Globally unique base name for the bootstrap S3 bucket. The full bucket name is composed as '<bucket_name>-<environment>' (e.g. 'ticketresolve-bucket-dev'). Must satisfy S3 naming rules."
   type        = string
 
   validation {
