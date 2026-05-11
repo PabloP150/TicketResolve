@@ -50,13 +50,8 @@ Se eligió un bucket S3 porque (a) es uno de los servicios más simples de aprov
 
 ### Extracto de `terraform plan`
 
-<!-- JUSTIFICACIÓN 3 — Pegar aquí el output real de `terraform plan` después de correrlo localmente.
-     El bloque de abajo es un placeholder con la forma esperada del output. Reemplazarlo con
-     el output real después de:
-       1. cd infra && terraform init
-       2. terraform plan -var-file=envs/dev/dev.tfvars
-     Pegar la sección "Terraform will perform the following actions" hasta "Plan: 1 to add, 0 to change, 0 to destroy."
-     -->
+Output literal capturado del PR comment generado por el workflow `Terraform CI`
+(PR [#1](https://github.com/PabloP150/TicketResolve/pull/1), run 25649224379):
 
 ```hcl
 Terraform used the selected providers to generate the following execution
@@ -67,15 +62,19 @@ Terraform will perform the following actions:
 
   # aws_s3_bucket.bootstrap will be created
   + resource "aws_s3_bucket" "bootstrap" {
+      + acceleration_status         = (known after apply)
+      + acl                         = (known after apply)
       + arn                         = (known after apply)
       + bucket                      = "ticketresolve-bucket-dev"
       + bucket_domain_name          = (known after apply)
+      + bucket_prefix               = (known after apply)
       + bucket_regional_domain_name = (known after apply)
       + force_destroy               = false
       + hosted_zone_id              = (known after apply)
       + id                          = (known after apply)
       + object_lock_enabled         = (known after apply)
-      + region                      = "us-east-1"
+      + policy                      = (known after apply)
+      + region                      = (known after apply)
       + request_payer               = (known after apply)
       + tags                        = {
           + "Application"  = "ticketresolve"
@@ -96,6 +95,8 @@ Terraform will perform the following actions:
           + "Purpose"      = "delivery-1-bootstrap"
           + "Region"       = "us-east-1"
         }
+      + website_domain              = (known after apply)
+      + website_endpoint            = (known after apply)
     }
 
 Plan: 1 to add, 0 to change, 0 to destroy.
