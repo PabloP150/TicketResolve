@@ -1,5 +1,7 @@
 # TicketResolve — Cloud Infrastructure
 
+[![Terraform CI](https://github.com/PabloP150/TicketResolve/actions/workflows/terraform-ci.yml/badge.svg?branch=main)](https://github.com/PabloP150/TicketResolve/actions/workflows/terraform-ci.yml)
+
 Repositorio compartido entre los cursos **Infraestructura en la Nube** y **Optimizaciones y Performance** (PDDS — Galileo).
 
 Este repositorio contiene:

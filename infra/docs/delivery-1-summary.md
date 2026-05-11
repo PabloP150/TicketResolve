@@ -1,8 +1,11 @@
 # Delivery 1 — IaC Workspace Bootstrap & CI Pipeline
 
 **Curso:** Optimizaciones y Performance — PDDS, Galileo
-**Equipo:** Pablo Pineda, Christian Martínez (equipo de 2 — confirmado con instructores)
+
+**Equipo:** Pablo Pineda, Christian Martínez 
+
 **Track:** Standard (no EKS) — CI sobre GitHub Actions
+
 **Fecha:** 2026-05-10
 
 ---
@@ -12,51 +15,41 @@
 **Proveedor:** AWS
 **Región:** `us-east-1`
 
-### Rationale
+### Elección de AWS como Proveedor de Nube
 
-<!-- JUSTIFICACIÓN 1 — Completar / revisar este párrafo:
-     El PDF (sección 3.2 punto 1) pide explicar por qué se eligió AWS y por qué us-east-1.
-     Sugerencias de argumentos a usar / adaptar:
-       - AWS es el proveedor con mayor cobertura en los servicios del curso (los 7 componentes:
-         EC2/Lambda/ECS, S3, RDS/DynamoDB, VPC, SQS/SNS/EventBridge, IAM/Secrets/KMS, CloudWatch).
-       - us-east-1 ofrece el mayor catálogo de servicios y suele ser la primera región
-         donde aparecen features nuevas (relevante para SQS FIFO, EventBridge Pipes, etc.).
-       - Precios de cómputo y egress más bajos comparados con otras regiones.
-       - Latencia razonable desde Guatemala (≈70ms) — aceptable para un proyecto académico
-         que no requiere data residency en LATAM.
-     -->
+Se seleccionó AWS como proveedor principal debido a la experiencia previa del equipo con su ecosistema. Esto permite priorizar la calidad de la implementación y la estabilidad del sistema sobre la curva de aprendizaje de una plataforma nueva.
 
-AWS fue seleccionado como proveedor porque cubre nativamente los siete componentes obligatorios del proyecto (compute, storage, database, networking, async processing, security, observability) bajo un único plano de control y un único modelo de IAM. La región `us-east-1` se eligió por su catálogo de servicios más amplio, precios más competitivos y por ser la primera región donde se liberan nuevas funcionalidades que serán útiles en deliveries siguientes (p. ej. EventBridge Pipes y SQS FIFO con deduplicación de alto throughput).
+**Ventajas técnicas:**
+* **Madurez del ecosistema de mensajería:** A diferencia de otros proveedores, la combinación nativa de SQS, SNS y EventBridge ofrece una granularidad superior para manejar patrones de mensajería asíncrona, fundamentales para la arquitectura del proyecto.
+* **Modelo de IAM simplificado:** El esquema de identidad de AWS a nivel de cuenta es mucho más eficiente para un equipo ágil, evitando la sobrecarga operativa de gestionar jerarquías complejas de organizaciones y proyectos que presentan otras nubes.
+* **Ecosistema de Terraform:** El provider de AWS es de los más estables y extensos, lo que permite utilizar módulos comunitarios probados para infraestructura de red y seguridad, evitando tener que "reinventar la rueda" en cada componente.
 
 ---
 
-## 2. Recurso aprovisionado
+### Selección de Región (us-east-1)
 
-Para Delivery 1 se aprovisiona **un único recurso real**: un bucket de Amazon S3 llamado `aws_s3_bucket.bootstrap`.
+La infraestructura se desplegará en la región `us-east-1` ya que es la región más apta y con menos latencia para un proyecto orientado a un público en Guatemala.
 
-### ¿Por qué este recurso?
+**Ventajas técnicas:**
+* **Latencia mínima:** Es la región con menor tiempo de respuesta desde Guatemala. Esto agiliza tanto el aprovisionamiento a través de Terraform como las pruebas de integración desde los entornos locales.
+* **Disponibilidad de servicios y costos:** Al ser la región principal de AWS, garantiza acceso inmediato a cualquier servicio nuevo y ofrece las tarifas más bajas para instancias on-demand, optimizando el presupuesto del proyecto.
 
-<!-- JUSTIFICACIÓN 2 — Completar / revisar este párrafo:
-     El PDF (sección 3.2 punto 2) pide explicar por qué se eligió como primer recurso.
-     Sugerencias:
-       - S3 es el servicio AWS más simple de aprovisionar: no requiere VPC, ni subnet groups,
-         ni configuración de red. Suficiente para validar credenciales y wiring de variables.
-       - El bucket se reutilizará: en Delivery 2 será el target real (con versioning, encryption,
-         lifecycle, etc.) del componente "Storage". En Delivery 5 puede albergar logs centralizados.
-       - El plan output es corto y fácil de revisar — útil para la review del PR del Delivery 1.
-     -->
+---
 
-Se eligió un bucket S3 porque (a) es uno de los servicios más simples de aprovisionar en AWS — no requiere VPC, subnet groups ni reglas de seguridad — lo cual lo hace ideal para validar de extremo a extremo el wiring de credenciales, variables y outputs sin introducir complejidad accidental; (b) es un recurso reutilizable: en Delivery 2 este bucket se promoverá al componente oficial de _Storage_ con `versioning`, `server_side_encryption_configuration` y `lifecycle_rule`, evitando trabajo desechable; (c) su `arn` es exactamente el tipo de valor que un módulo aguas abajo (p. ej. IAM policies en Delivery 5) consumirá, ejercitando la mecánica de outputs desde el primer día.
+## 2. Almacenamiento de Adjuntos con Amazon S3
+
+Para TicketResolve, es necesario contar con un sistema robusto para manejar documentos visuales como capturas, fotos y logs. Amazon S3 se seleccionó como un componente ideal para la persistencia de estos documentos.
+
+**Ventajas técnicas:**
+* **Alta disponibilidad y durabilidad:** S3 garantiza que los archivos adjuntos de los tickets no se pierdan sin importar el volumen de datos.
+* **Optimización del Backend (Presigned URLs):** El soporte nativo para los presigned URLs permite que los clientes carguen archivos directamente al bucket. Esto reduce la carga del servidor de aplicaciones, ya que el backend no debe procesar el flujo de datos de archivos pesados, mejorando la escalabilidad del sistema.
+
+---
 
 ### Extracto de `terraform plan`
 
-<!-- JUSTIFICACIÓN 3 — Pegar aquí el output real de `terraform plan` después de correrlo localmente.
-     El bloque de abajo es un placeholder con la forma esperada del output. Reemplazarlo con
-     el output real después de:
-       1. cd infra && terraform init
-       2. terraform plan -var-file=envs/dev/dev.tfvars
-     Pegar la sección "Terraform will perform the following actions" hasta "Plan: 1 to add, 0 to change, 0 to destroy."
-     -->
+Output literal capturado del PR comment generado por el workflow `Terraform CI`
+(PR [#1](https://github.com/PabloP150/TicketResolve/pull/1), run 25649224379):
 
 ```hcl
 Terraform used the selected providers to generate the following execution
@@ -67,15 +60,19 @@ Terraform will perform the following actions:
 
   # aws_s3_bucket.bootstrap will be created
   + resource "aws_s3_bucket" "bootstrap" {
+      + acceleration_status         = (known after apply)
+      + acl                         = (known after apply)
       + arn                         = (known after apply)
       + bucket                      = "ticketresolve-bucket-dev"
       + bucket_domain_name          = (known after apply)
+      + bucket_prefix               = (known after apply)
       + bucket_regional_domain_name = (known after apply)
       + force_destroy               = false
       + hosted_zone_id              = (known after apply)
       + id                          = (known after apply)
       + object_lock_enabled         = (known after apply)
-      + region                      = "us-east-1"
+      + policy                      = (known after apply)
+      + region                      = (known after apply)
       + request_payer               = (known after apply)
       + tags                        = {
           + "Application"  = "ticketresolve"
@@ -96,6 +93,8 @@ Terraform will perform the following actions:
           + "Purpose"      = "delivery-1-bootstrap"
           + "Region"       = "us-east-1"
         }
+      + website_domain              = (known after apply)
+      + website_endpoint            = (known after apply)
     }
 
 Plan: 1 to add, 0 to change, 0 to destroy.
@@ -155,46 +154,20 @@ Las cinco variables superan el mínimo de cuatro exigido por el PDF y cubren tod
 
 ## 5. Decisiones y trade-offs
 
-### Decisión 1 — Estado local en lugar de remoto
+### 1. Desacoplamiento del estado remoto con `-backend=false`
 
-Se optó por **mantener `terraform.tfstate` localmente** en Delivery 1, sin configurar un backend S3 + DynamoDB para state locking.
+Para los jobs de CI, decidimos correr el `terraform init` con el flag `-backend=false`. Esto se hizo con el propósito de que la validación y formato funcionen por si solos, sin tener que ir a traer el estado real a la nube cada vez que se sube un cambio.
 
-<!-- JUSTIFICACIÓN 4 — Revisar el párrafo de abajo. Argumentos cubiertos:
-       - El PDF (sección 3.1.1) lo permite explícitamente para Deliveries 1–3.
-       - Hacer remote state en Delivery 1 requiere bootstrappear un bucket de state + tabla DynamoDB,
-         lo cual genera un problema circular (¿quién crea el bucket de state? ¿con qué state?)
-         que normalmente se resuelve con dos workspaces.
-       - Diferirlo a Delivery 2 (donde es un requisito explícito de grading) permite enfocarse en
-         validar el wiring de provider/variables/outputs y el pipeline de CI en esta entrega.
-     -->
+**Ventajas técnicas:**
 
-El PDF permite estado local para Deliveries 1–3 y exige migración a remoto recién en Delivery 2 como criterio calificado. Configurar el backend remoto desde el día uno introduciría un problema de _bootstrap circular_: el bucket S3 que aloja el state también es un recurso Terraform que necesita un state donde guardarse. Resolverlo correctamente exige dos workspaces (uno _bootstrap_ con state local que crea el bucket, y otro _principal_ que usa el bucket). Esa complejidad es valiosa pero excede el alcance del Delivery 1, cuya meta declarada es validar estructura y pipeline, no aún la robustez del state. Por eso aceptamos la deuda técnica de estado local en esta entrega y la pagamos en Delivery 2 con un sub-workspace dedicado de bootstrap.
+- **Seguridad:** Al no necesitar el estado (S3/DB) en los PRs, se elimina el riesgo de exponer credenciales sensibles. Si por algún motivo el workflow se ve comprometido, el atacante no tiene cómo acceder al estado de la infraestructura.
+- **Pipeline más estable:** Si S3 o la base de datos demuestran latencia o caen, el flujo de desarrollo no se quedaría estancado. El equipo puede seguir validando el código sin depender de que los servicios de AWS estén al 100% en ese momento.
 
-### Decisión 2 — Pinning de versión `~> 5.0` para el provider de AWS
+### 2. Uso de Access Keys en lugar de OIDC
 
-Se pinneó el provider AWS con `version = "~> 5.0"` en lugar de un pin exacto (`= 5.62.0`) o un rango más amplio (`>= 5.0`).
+En lugar de implementar federación de identidad con OIDC, se optó por utilizar Access Keys almacenadas en GitHub Secrets para la autenticación del proveedor de AWS.
 
-<!-- JUSTIFICACIÓN 5 — Revisar el párrafo de abajo. Argumentos cubiertos:
-       - "~> 5.0" permite minor y patch updates dentro de la major 5, pero bloquea automáticamente
-         un salto a la major 6 (que podría introducir breaking changes).
-       - Combinado con `.terraform.lock.hcl` (committeado), garantiza builds reproducibles entre
-         miembros del equipo y el runner de CI.
-       - Pin exacto (=5.62.0) sería más estricto pero obliga a abrir PRs para cada patch de
-         seguridad menor, generando ruido.
-       - El PDF (Common Pitfalls) penaliza wildcards (= "*") y no requiere pin exacto.
-     -->
+**Ventajas técnicas:**
 
-El operador `~> 5.0` admite actualizaciones de minor y patch dentro de la major 5 pero bloquea automáticamente un salto a la major 6, que históricamente ha traído cambios incompatibles en el provider de AWS. En conjunto con el archivo `.terraform.lock.hcl` (que sí se committea), esto garantiza builds bit-a-bit reproducibles entre los runners de CI y las máquinas del equipo, sin obligar a abrir un PR por cada patch de seguridad. Un pin exacto (`= 5.x.y`) sería más estricto pero generaría fricción operacional sin un beneficio claro a esta escala; un rango amplio (`>= 5.0`) violaría el _pitfall_ documentado en el PDF sobre wildcards.
-
-### Decisión 3 _(opcional, recomendada)_ — `default_tags` en el provider
-
-Se configuró el bloque `default_tags` directamente en el `provider "aws"` con cinco tags base (`Project`, `Environment`, `ManagedBy`, `Delivery`, y los tags por recurso).
-
-<!-- JUSTIFICACIÓN 6 — Opcional. El rubric pide "al menos 2 decisiones" — esta puede dejarse o quitarse.
-     Argumento:
-       - default_tags aplica los tags a todos los recursos creados por el provider sin tener que
-         repetirlos en cada bloque `resource`. Esto reduce drift entre módulos en deliveries futuros
-         y habilita cost allocation tags desde el primer recurso.
-     -->
-
-`default_tags` aplica un conjunto base de tags a todos los recursos del workspace sin requerir que cada bloque `resource` los repita. Esto previene drift entre módulos en deliveries futuros, habilita _cost allocation_ desde el primer recurso, y se manifiesta visiblemente en el `tags_all` del plan output — facilitando la revisión durante el grading.
+- **Resolución de dependencias circulares (Bootstrapping):** Implementar OIDC genera un problema: se requiere que Terraform cree el Identity Provider y el IAM Role en AWS, pero Terraform no puede ejecutarse para crearlos si no encuentra una identidad previamente configurada. Las llaves permiten romper esta dependencia inicial.
+- **Reducción de Sobrecarga Operativa:** Configurar OIDC requiere definir políticas de confianza específicas para el repositorio, la organización y los branches. En esta etapa, el uso de llaves reduce los puntos de falla en el pipeline, evitando errores de autenticación por configuraciones de confianza o mal definidas en el proveedor de identidad.
