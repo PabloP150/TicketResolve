@@ -35,12 +35,14 @@ variable "architecture" {
   }
 }
 
-variable "bucket_name" {
-  description = "Globally unique base name for the bootstrap S3 bucket. The full bucket name is composed as '<bucket_name>-<environment>' (e.g. 'ticketresolve-bucket-dev'). Must satisfy S3 naming rules."
-  type        = string
+variable "lambda_memory_default" {
+  description = "Default memory (MB) for Lambda functions that do not specify their own. Functions with heavier work (reporte-pdf) override this per-call."
+  type        = number
+  default     = 256
+}
 
-  validation {
-    condition     = can(regex("^[a-z0-9][a-z0-9-]{1,40}[a-z0-9]$", var.bucket_name))
-    error_message = "bucket_name must be 3-42 chars, lowercase alphanumerics and hyphens, and cannot start or end with a hyphen."
-  }
+variable "lambda_timeout_default" {
+  description = "Default timeout (seconds) for Lambda functions that do not specify their own."
+  type        = number
+  default     = 10
 }

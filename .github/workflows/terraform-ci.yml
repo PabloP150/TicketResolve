@@ -36,15 +36,19 @@ jobs:
       - name: Terraform Format Check
         run: terraform fmt --check -recursive
 
+      # Delivery 2: the workspace now has a remote backend (S3 + DynamoDB lock).
+      # `terraform plan` needs the backend initialized to read state, so we no
+      # longer pass -backend=false. The runner uses the AWS credentials below to
+      # read the state bucket and to acquire/release the DynamoDB lock briefly.
       - name: Terraform Init
-        run: terraform init -backend=false
+        run: terraform init -input=false -lock-timeout=60s
 
       - name: Terraform Validate
         run: terraform validate
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -var-file=envs/dev/dev.tfvars -no-color 2>&1 | tee plan.txt
+        run: terraform plan -var-file=envs/dev/dev.tfvars -no-color -lock-timeout=60s 2>&1 | tee plan.txt
 
       - name: Post Plan as PR Comment
         if: always()
