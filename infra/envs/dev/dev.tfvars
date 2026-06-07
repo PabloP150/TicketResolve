@@ -12,7 +12,10 @@ availability_zones        = ["us-east-1a", "us-east-1b"]
 public_subnet_cidrs       = ["10.20.0.0/24", "10.20.1.0/24"]
 private_app_subnet_cidrs  = ["10.20.10.0/24", "10.20.11.0/24"]
 private_data_subnet_cidrs = ["10.20.20.0/24", "10.20.21.0/24"]
-enable_nat_gateway        = true
+# Cost control (post Delivery-3): NAT Gateway apagado para evitar el costo fijo
+# (~$32/mes). Las Lambdas corren fuera de la VPC, así que la demo E2E sigue
+# funcionando. Poner en true para reactivar el egress de subnets privadas.
+enable_nat_gateway        = false
 single_nat_gateway        = true
 
 # --- Network security (Delivery 3) ---
