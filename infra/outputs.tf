@@ -66,14 +66,67 @@ output "lambda_function_arns" {
   }
 }
 
-# --- API Gateway outputs -----------------------------------------------------
+# --- Ingress (API Gateway) outputs -------------------------------------------
 
 output "api_gateway_endpoint" {
-  description = "Public HTTPS endpoint for the API Gateway HTTP API. Routes: POST /api/v1/incidents, POST /api/v1/webhooks."
-  value       = aws_apigatewayv2_api.main.api_endpoint
+  description = "Public HTTPS endpoint for the API Gateway HTTP API. Routes: GET/POST /api/v1/incidents, POST /api/v1/webhooks, GET health check."
+  value       = module.ingress.api_endpoint
 }
 
 output "api_gateway_id" {
   description = "ID of the API Gateway HTTP API resource. Useful for CLI introspection in evidence steps."
-  value       = aws_apigatewayv2_api.main.id
+  value       = module.ingress.api_id
+}
+
+output "ingress_url" {
+  description = "Public ingress URL of the /api/v1/incidents resource — the E2E GET/POST endpoint exercised in Delivery 3."
+  value       = module.ingress.incidents_url
+}
+
+output "health_check_url" {
+  description = "Public health/readiness check URL exposed by the ingress."
+  value       = module.ingress.health_check_url
+}
+
+# --- Network outputs ---------------------------------------------------------
+
+output "vpc_id" {
+  description = "ID of the project VPC provisioned by the network module."
+  value       = module.network.vpc_id
+}
+
+output "public_subnet_ids" {
+  description = "Public subnet IDs (one per AZ)."
+  value       = module.network.public_subnet_ids
+}
+
+output "private_subnet_ids" {
+  description = "All private subnet IDs (app + data)."
+  value       = module.network.private_subnet_ids
+}
+
+output "private_app_subnet_ids" {
+  description = "Private application subnet IDs (one per AZ)."
+  value       = module.network.private_app_subnet_ids
+}
+
+output "private_data_subnet_ids" {
+  description = "Private data subnet IDs (one per AZ, reserved)."
+  value       = module.network.private_data_subnet_ids
+}
+
+output "nat_gateway_ids" {
+  description = "NAT Gateway IDs (empty if NAT is disabled)."
+  value       = module.network.nat_gateway_ids
+}
+
+# --- Security outputs --------------------------------------------------------
+
+output "security_group_ids" {
+  description = "Map of tier -> security group id (web/app/db)."
+  value = {
+    web = module.security.web_sg_id
+    app = module.security.app_sg_id
+    db  = module.security.db_sg_id
+  }
 }

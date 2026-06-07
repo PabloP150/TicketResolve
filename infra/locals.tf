@@ -1,4 +1,7 @@
 locals {
+  # Single prefix every module derives its resource names from (e.g. ticketresolve-dev).
+  name_prefix = "${var.app_name}-${var.environment}"
+
   # Derived naming so every resource is built from var.app_name + var.environment, never hardcoded.
   attachments_bucket_name = "${var.app_name}-attachments-${var.environment}-${data.aws_caller_identity.current.account_id}"
   reports_bucket_name     = "${var.app_name}-reports-${var.environment}-${data.aws_caller_identity.current.account_id}"

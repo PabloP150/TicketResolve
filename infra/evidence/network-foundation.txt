@@ -1,0 +1,53 @@
+api_gateway_endpoint = "https://o2mbl3sx1i.execute-api.us-east-1.amazonaws.com"
+api_gateway_id = "o2mbl3sx1i"
+attachments_bucket_arn = "arn:aws:s3:::ticketresolve-attachments-dev-010526283195"
+attachments_bucket_name = "ticketresolve-attachments-dev-010526283195"
+database_stream_arn = "arn:aws:dynamodb:us-east-1:010526283195:table/ticketresolve-dev/stream/2026-05-21T05:22:56.548"
+database_table_arn = "arn:aws:dynamodb:us-east-1:010526283195:table/ticketresolve-dev"
+database_table_name = "ticketresolve-dev"
+health_check_url = "https://o2mbl3sx1i.execute-api.us-east-1.amazonaws.com/"
+ingress_url = "https://o2mbl3sx1i.execute-api.us-east-1.amazonaws.com/api/v1/incidents"
+lambda_function_arns = {
+  "api_tickets" = "arn:aws:lambda:us-east-1:010526283195:function:ticketresolve-api-tickets-dev"
+  "escalamiento" = "arn:aws:lambda:us-east-1:010526283195:function:ticketresolve-escalamiento-dev"
+  "notificacion" = "arn:aws:lambda:us-east-1:010526283195:function:ticketresolve-notificacion-dev"
+  "reporte_pdf" = "arn:aws:lambda:us-east-1:010526283195:function:ticketresolve-reporte-pdf-dev"
+  "webhook_ingesta" = "arn:aws:lambda:us-east-1:010526283195:function:ticketresolve-webhook-ingesta-dev"
+}
+lambda_function_names = {
+  "api_tickets" = "ticketresolve-api-tickets-dev"
+  "escalamiento" = "ticketresolve-escalamiento-dev"
+  "notificacion" = "ticketresolve-notificacion-dev"
+  "reporte_pdf" = "ticketresolve-reporte-pdf-dev"
+  "webhook_ingesta" = "ticketresolve-webhook-ingesta-dev"
+}
+nat_gateway_ids = [
+  "nat-01602aa6280cc0a72",
+]
+private_app_subnet_ids = [
+  "subnet-07f9c50261f15276b",
+  "subnet-072c27b8cf25d1563",
+]
+private_data_subnet_ids = [
+  "subnet-0a63ade8e383b06b9",
+  "subnet-01641b3ea39db5242",
+]
+private_subnet_ids = [
+  "subnet-07f9c50261f15276b",
+  "subnet-072c27b8cf25d1563",
+  "subnet-0a63ade8e383b06b9",
+  "subnet-01641b3ea39db5242",
+]
+public_subnet_ids = [
+  "subnet-0a7061f18be644d85",
+  "subnet-07663e3e31b7f98b7",
+]
+reports_bucket_arn = "arn:aws:s3:::ticketresolve-reports-dev-010526283195"
+reports_bucket_name = "ticketresolve-reports-dev-010526283195"
+security_group_ids = {
+  "app" = "sg-044a3e38e9e769099"
+  "db" = "sg-01c1e5856bd509daf"
+  "web" = "sg-0d5a8a6c43ce13a1a"
+}
+vpc_id = "vpc-0489f18f6463adda0"
+workspace_region = "us-east-1"

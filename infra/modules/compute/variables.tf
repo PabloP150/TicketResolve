@@ -48,6 +48,12 @@ variable "environment_variables" {
   default     = {}
 }
 
+variable "source_dir" {
+  description = "Optional path to a directory with real handler code to package. When null (default) the module bundles an inline placeholder handler. When set, the directory is zipped as the function source."
+  type        = string
+  default     = null
+}
+
 variable "additional_iam_statements" {
   description = "Service-specific IAM statements appended to the Lambda's execution role. Each statement must specify explicit actions and resource ARNs — wildcards are not permitted (rubric requirement)."
   type = list(object({

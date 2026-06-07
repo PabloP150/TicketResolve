@@ -1,0 +1,49 @@
+name: Terraform Apply
+
+# Apply-on-merge: when a PR is merged to main, provision the infrastructure
+# (networking, security, ingress, compute, storage, database) against dev.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "infra/**"
+      - ".github/workflows/terraform-apply.yml"
+
+# Avoid overlapping applies racing for the same remote state lock.
+concurrency:
+  group: terraform-apply-main
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply (dev)
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    defaults:
+      run:
+        working-directory: infra/
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.8"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Terraform Init
+        run: terraform init -input=false -lock-timeout=120s
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -input=false -lock-timeout=120s -var-file=envs/dev/dev.tfvars

@@ -1,0 +1,59 @@
+* Host o2mbl3sx1i.execute-api.us-east-1.amazonaws.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 34.225.29.80, 52.86.40.20
+*   Trying 34.225.29.80:443...
+* Connected to o2mbl3sx1i.execute-api.us-east-1.amazonaws.com (34.225.29.80) port 443
+* ALPN: curl offers h2,http/1.1
+* (304) (OUT), TLS handshake, Client hello (1):
+} [351 bytes data]
+*  CAfile: /etc/ssl/cert.pem
+*  CApath: none
+* (304) (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* (304) (IN), TLS handshake, Unknown (8):
+{ [19 bytes data]
+* (304) (IN), TLS handshake, Certificate (11):
+{ [3841 bytes data]
+* (304) (IN), TLS handshake, CERT verify (15):
+{ [264 bytes data]
+* (304) (IN), TLS handshake, Finished (20):
+{ [36 bytes data]
+* (304) (OUT), TLS handshake, Finished (20):
+} [36 bytes data]
+* SSL connection using TLSv1.3 / AEAD-AES128-GCM-SHA256 / [blank] / UNDEF
+* ALPN: server accepted h2
+* Server certificate:
+*  subject: CN=*.execute-api.us-east-1.amazonaws.com
+*  start date: Apr 22 00:00:00 2026 GMT
+*  expire date: Nov  5 23:59:59 2026 GMT
+*  subjectAltName: host "o2mbl3sx1i.execute-api.us-east-1.amazonaws.com" matched cert's "*.execute-api.us-east-1.amazonaws.com"
+*  issuer: C=US; O=Amazon; CN=Amazon RSA 2048 M01
+*  SSL certificate verify ok.
+* using HTTP/2
+* [HTTP/2] [1] OPENED stream for https://o2mbl3sx1i.execute-api.us-east-1.amazonaws.com/api/v1/incidents
+* [HTTP/2] [1] [:method: POST]
+* [HTTP/2] [1] [:scheme: https]
+* [HTTP/2] [1] [:authority: o2mbl3sx1i.execute-api.us-east-1.amazonaws.com]
+* [HTTP/2] [1] [:path: /api/v1/incidents]
+* [HTTP/2] [1] [user-agent: curl/8.7.1]
+* [HTTP/2] [1] [accept: */*]
+* [HTTP/2] [1] [content-type: application/json]
+* [HTTP/2] [1] [content-length: 68]
+> POST /api/v1/incidents HTTP/2
+> Host: o2mbl3sx1i.execute-api.us-east-1.amazonaws.com
+> User-Agent: curl/8.7.1
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 68
+> 
+} [68 bytes data]
+* upload completely sent off: 68 bytes
+< HTTP/2 201 
+< date: Sun, 07 Jun 2026 18:12:29 GMT
+< content-type: application/json
+< content-length: 153
+< apigw-requestid: emkmIiqioAMESRw=
+< 
+{ [153 bytes data]
+* Connection #0 to host o2mbl3sx1i.execute-api.us-east-1.amazonaws.com left intact
+{"source": "s3", "bucket": "ticketresolve-attachments-dev-010526283195", "key": "attachments/2026-06-07T18-12-29Z-4758bf99b52d498eab81ea7f3ab24633.json"}

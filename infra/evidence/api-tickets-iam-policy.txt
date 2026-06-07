@@ -1,0 +1,50 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "logs:PutLogEvents",
+                "logs:CreateLogStream"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:logs:us-east-1:010526283195:log-group:/aws/lambda/ticketresolve-api-tickets-dev:*",
+            "Sid": "WriteOwnLogs"
+        },
+        {
+            "Action": [
+                "dynamodb:UpdateItem",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:PutItem",
+                "dynamodb:GetItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:BatchGetItem"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:dynamodb:us-east-1:010526283195:table/ticketresolve-dev/index/GSI2",
+                "arn:aws:dynamodb:us-east-1:010526283195:table/ticketresolve-dev/index/GSI1",
+                "arn:aws:dynamodb:us-east-1:010526283195:table/ticketresolve-dev"
+            ],
+            "Sid": "DynamoDBTicketsCRUD"
+        },
+        {
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObject"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::ticketresolve-attachments-dev-010526283195/*",
+            "Sid": "S3AttachmentsReadWrite"
+        },
+        {
+            "Action": "s3:ListBucket",
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::ticketresolve-attachments-dev-010526283195",
+            "Sid": "S3AttachmentsList"
+        }
+    ]
+}
