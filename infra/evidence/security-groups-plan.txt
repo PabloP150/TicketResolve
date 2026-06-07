@@ -1,0 +1,200 @@
+  # module.security.aws_network_acl.private will be created
+  + resource "aws_network_acl" "private" {
+      + arn        = (known after apply)
+      + egress     = (known after apply)
+      + id         = (known after apply)
+      + ingress    = (known after apply)
+      + owner_id   = (known after apply)
+      + subnet_ids = (known after apply)
+      + tags       = {
+          + "Application" = "ticketresolve"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Module"      = "security"
+          + "Name"        = "ticketresolve-dev-nacl-private"
+          + "Tier"        = "private"
+        }
+      + tags_all   = {
+          + "Application" = "ticketresolve"
+          + "Delivery"    = "oyd-delivery-1"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Module"      = "security"
+          + "Name"        = "ticketresolve-dev-nacl-private"
+          + "Project"     = "ticketresolve"
+          + "Tier"        = "private"
+        }
+      + vpc_id     = (known after apply)
+    }
+
+  # module.security.aws_network_acl.public will be created
+  + resource "aws_network_acl" "public" {
+      + arn        = (known after apply)
+      + egress     = (known after apply)
+      + id         = (known after apply)
+      + ingress    = (known after apply)
+      + owner_id   = (known after apply)
+      + subnet_ids = (known after apply)
+      + tags       = {
+          + "Application" = "ticketresolve"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Module"      = "security"
+          + "Name"        = "ticketresolve-dev-nacl-public"
+          + "Tier"        = "public"
+        }
+      + tags_all   = {
+          + "Application" = "ticketresolve"
+          + "Delivery"    = "oyd-delivery-1"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Module"      = "security"
+          + "Name"        = "ticketresolve-dev-nacl-public"
+          + "Project"     = "ticketresolve"
+          + "Tier"        = "public"
+        }
+      + vpc_id     = (known after apply)
+    }
+
+  # module.security.aws_network_acl_rule.private_in_ephemeral will be created
+  + resource "aws_network_acl_rule" "private_in_ephemeral" {
+      + cidr_block     = "0.0.0.0/0"
+      + egress         = false
+      + from_port      = 1024
+      + id             = (known after apply)
+      + network_acl_id = (known after apply)
+      + protocol       = "tcp"
+      + rule_action    = "allow"
+      + rule_number    = 110
+      + to_port        = 65535
+    }
+
+  # module.security.aws_network_acl_rule.private_in_vpc will be created
+  + resource "aws_network_acl_rule" "private_in_vpc" {
+      + cidr_block     = "10.20.0.0/16"
+      + egress         = false
+      + from_port      = 0
+      + id             = (known after apply)
+      + network_acl_id = (known after apply)
+      + protocol       = "-1"
+      + rule_action    = "allow"
+      + rule_number    = 100
+      + to_port        = 0
+    }
+
+  # module.security.aws_network_acl_rule.private_out_ephemeral will be created
+  + resource "aws_network_acl_rule" "private_out_ephemeral" {
+      + cidr_block     = "0.0.0.0/0"
+      + egress         = true
+      + from_port      = 1024
+      + id             = (known after apply)
+      + network_acl_id = (known after apply)
+      + protocol       = "tcp"
+      + rule_action    = "allow"
+      + rule_number    = 120
+      + to_port        = 65535
+    }
+
+  # module.security.aws_network_acl_rule.private_out_https will be created
+  + resource "aws_network_acl_rule" "private_out_https" {
+      + cidr_block     = "0.0.0.0/0"
+      + egress         = true
+      + from_port      = 443
+      + id             = (known after apply)
+      + network_acl_id = (known after apply)
+      + protocol       = "tcp"
+      + rule_action    = "allow"
+      + rule_number    = 110
+      + to_port        = 443
+    }
+
+  # module.security.aws_network_acl_rule.private_out_vpc will be created
+  + resource "aws_network_acl_rule" "private_out_vpc" {
+      + cidr_block     = "10.20.0.0/16"
+      + egress         = true
+      + from_port      = 0
+      + id             = (known after apply)
+      + network_acl_id = (known after apply)
+      + protocol       = "-1"
+      + rule_action    = "allow"
+      + rule_number    = 100
+      + to_port        = 0
+    }
+
+  # module.security.aws_network_acl_rule.public_in_ephemeral will be created
+  + resource "aws_network_acl_rule" "public_in_ephemeral" {
+      + cidr_block     = "0.0.0.0/0"
+      + egress         = false
+      + from_port      = 1024
+      + id             = (known after apply)
+      + network_acl_id = (known after apply)
+      + protocol       = "tcp"
+      + rule_action    = "allow"
+      + rule_number    = 120
+      + to_port        = 65535
+    }
+
+  # module.security.aws_network_acl_rule.public_in_http will be created
+  + resource "aws_network_acl_rule" "public_in_http" {
+      + cidr_block     = "0.0.0.0/0"
+      + egress         = false
+      + from_port      = 80
+      + id             = (known after apply)
+      + network_acl_id = (known after apply)
+      + protocol       = "tcp"
+      + rule_action    = "allow"
+      + rule_number    = 100
+      + to_port        = 80
+    }
+
+  # module.security.aws_network_acl_rule.public_in_https will be created
+  + resource "aws_network_acl_rule" "public_in_https" {
+      + cidr_block     = "0.0.0.0/0"
+      + egress         = false
+      + from_port      = 443
+      + id             = (known after apply)
+      + network_acl_id = (known after apply)
+      + protocol       = "tcp"
+      + rule_action    = "allow"
+      + rule_number    = 110
+      + to_port        = 443
+    }
+
+  # module.security.aws_network_acl_rule.public_out_ephemeral will be created
+  + resource "aws_network_acl_rule" "public_out_ephemeral" {
+      + cidr_block     = "0.0.0.0/0"
+      + egress         = true
+      + from_port      = 1024
+      + id             = (known after apply)
+      + network_acl_id = (known after apply)
+      + protocol       = "tcp"
+      + rule_action    = "allow"
+      + rule_number    = 120
+      + to_port        = 65535
+    }
+
+  # module.security.aws_network_acl_rule.public_out_http will be created
+  + resource "aws_network_acl_rule" "public_out_http" {
+      + cidr_block     = "0.0.0.0/0"
+      + egress         = true
+      + from_port      = 80
+      + id             = (known after apply)
+      + network_acl_id = (known after apply)
+      + protocol       = "tcp"
+      + rule_action    = "allow"
+      + rule_number    = 100
+      + to_port        = 80
+    }
+
+  # module.security.aws_network_acl_rule.public_out_https will be created
+  + resource "aws_network_acl_rule" "public_out_https" {
+      + cidr_block     = "0.0.0.0/0"
+      + egress         = true
+      + from_port      = 443
+      + id             = (known after apply)
+      + network_acl_id = (known after apply)
+      + protocol       = "tcp"
+      + rule_action    = "allow"
+      + rule_number    = 110
+      + to_port        = 443
+    }

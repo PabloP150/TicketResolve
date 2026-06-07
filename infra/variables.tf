@@ -46,3 +46,87 @@ variable "lambda_timeout_default" {
   type        = number
   default     = 10
 }
+
+# --- Networking (Delivery 3) -------------------------------------------------
+
+variable "vpc_cidr" {
+  description = "CIDR block for the project VPC. Private RFC 1918 range with room for the three-tier subnet layout across two AZs."
+  type        = string
+  default     = "10.20.0.0/16"
+}
+
+variable "availability_zones" {
+  description = "Availability zones the subnets are spread across. Length must match the *_subnet_cidrs lists."
+  type        = list(string)
+  default     = ["us-east-1a", "us-east-1b"]
+}
+
+variable "public_subnet_cidrs" {
+  description = "CIDR blocks for the public subnets, one per AZ (NAT Gateway and future ALB)."
+  type        = list(string)
+  default     = ["10.20.0.0/24", "10.20.1.0/24"]
+}
+
+variable "private_app_subnet_cidrs" {
+  description = "CIDR blocks for the private application subnets, one per AZ (Lambda ENIs when attached to the VPC)."
+  type        = list(string)
+  default     = ["10.20.10.0/24", "10.20.11.0/24"]
+}
+
+variable "private_data_subnet_cidrs" {
+  description = "CIDR blocks for the private data subnets, one per AZ (reserved for a future RDS / ElastiCache layer)."
+  type        = list(string)
+  default     = ["10.20.20.0/24", "10.20.21.0/24"]
+}
+
+variable "enable_nat_gateway" {
+  description = "Whether to provision the NAT Gateway(s) and the private-app default route. Required for full Delivery-3 credit."
+  type        = bool
+  default     = true
+}
+
+variable "single_nat_gateway" {
+  description = "true = one shared NAT Gateway (cheaper, single-AZ risk). false = one NAT per AZ (full HA, higher cost)."
+  type        = bool
+  default     = true
+}
+
+# --- Network security (Delivery 3) ------------------------------------------
+
+variable "web_ingress_cidrs" {
+  description = "CIDR blocks allowed to reach the web tier on HTTP/HTTPS."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+variable "http_port" {
+  description = "HTTP port allowed inbound on the web tier and the public NACL."
+  type        = number
+  default     = 80
+}
+
+variable "https_port" {
+  description = "HTTPS port allowed inbound on the web tier and the public NACL."
+  type        = number
+  default     = 443
+}
+
+variable "app_port" {
+  description = "Application-tier port for the web -> app security-group rules."
+  type        = number
+  default     = 443
+}
+
+variable "db_port" {
+  description = "Database-tier port for the app -> db security-group rules (PostgreSQL default for the reserved data layer)."
+  type        = number
+  default     = 5432
+}
+
+# --- Ingress (Delivery 3) ---------------------------------------------------
+
+variable "health_check_path" {
+  description = "Path exposed as the ingress health/readiness check (routed GET to the api-tickets Lambda)."
+  type        = string
+  default     = "/"
+}

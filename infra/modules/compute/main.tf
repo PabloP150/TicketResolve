@@ -15,9 +15,12 @@ locals {
   })
 }
 
-# Inline placeholder code — replaced in later deliveries when the actual application code lives in the repo.
-# For Delivery 2, the goal is to PROVISION the Lambda; functional behaviour is out of scope.
+# Packaging: when var.source_dir is set the module zips that directory as the
+# real handler (Delivery 3 E2E endpoints). Otherwise it bundles an inline
+# placeholder that returns a static 200 — enough to PROVISION functions whose
+# business logic lands in a later delivery.
 data "archive_file" "placeholder" {
+  count       = var.source_dir == null ? 1 : 0
   type        = "zip"
   output_path = "${path.module}/build/${var.function_name}.zip"
 
@@ -36,6 +39,18 @@ data "archive_file" "placeholder" {
           }
     PYTHON
   }
+}
+
+data "archive_file" "from_source" {
+  count       = var.source_dir == null ? 0 : 1
+  type        = "zip"
+  source_dir  = var.source_dir
+  output_path = "${path.module}/build/${var.function_name}.zip"
+}
+
+locals {
+  archive_path = var.source_dir == null ? data.archive_file.placeholder[0].output_path : data.archive_file.from_source[0].output_path
+  archive_hash = var.source_dir == null ? data.archive_file.placeholder[0].output_base64sha256 : data.archive_file.from_source[0].output_base64sha256
 }
 
 resource "aws_cloudwatch_log_group" "this" {
@@ -105,8 +120,8 @@ resource "aws_lambda_function" "this" {
   memory_size   = var.memory_size
   timeout       = var.timeout
 
-  filename         = data.archive_file.placeholder.output_path
-  source_code_hash = data.archive_file.placeholder.output_base64sha256
+  filename         = local.archive_path
+  source_code_hash = local.archive_hash
 
   environment {
     variables = merge(var.environment_variables, {

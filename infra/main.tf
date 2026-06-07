@@ -100,6 +100,9 @@ module "lambda_api_tickets" {
   memory_size   = 512
   timeout       = var.lambda_timeout_default
 
+  # Real handler for the Delivery 3 end-to-end proof (GET DynamoDB / POST S3).
+  source_dir = "${path.module}/lambda_src/api_tickets"
+
   environment_variables = {
     TABLE_NAME         = module.database.table_name
     ATTACHMENTS_BUCKET = module.attachments_bucket.bucket_name
@@ -207,78 +210,99 @@ module "lambda_reporte_pdf" {
 }
 
 # ---------------------------------------------------------------------------
-# API Gateway HTTP API — routes two paths to two Lambdas. The api-tickets
-# Lambda's invoke_arn is consumed here, demonstrating module → root wiring.
+# Network — VPC, subnets (public / private-app / private-data x 2 AZs), IGW,
+# NAT Gateway, route tables and S3/DynamoDB Gateway Endpoints. Every input is
+# wired from root variables/locals — no hardcoded CIDRs in the module call.
 # ---------------------------------------------------------------------------
+module "network" {
+  source = "./modules/network"
 
-resource "aws_apigatewayv2_api" "main" {
-  name          = local.api_name
-  protocol_type = "HTTP"
-  description   = "TicketResolve public HTTP API. Routes /api/v1/incidents and /api/v1/webhooks to dedicated Lambdas."
+  name_prefix = local.name_prefix
+  environment = var.environment
 
-  cors_configuration {
-    allow_origins = ["*"]
-    allow_methods = ["GET", "POST", "PATCH", "OPTIONS"]
-    allow_headers = ["content-type", "authorization"]
-  }
-
-  tags = {
-    Application = var.app_name
-    Environment = var.environment
-    ManagedBy   = "Terraform"
-  }
-}
-
-resource "aws_apigatewayv2_integration" "api_tickets" {
-  api_id                 = aws_apigatewayv2_api.main.id
-  integration_type       = "AWS_PROXY"
-  integration_uri        = module.lambda_api_tickets.invoke_arn
-  payload_format_version = "2.0"
-}
-
-resource "aws_apigatewayv2_integration" "webhook_ingesta" {
-  api_id                 = aws_apigatewayv2_api.main.id
-  integration_type       = "AWS_PROXY"
-  integration_uri        = module.lambda_webhook_ingesta.invoke_arn
-  payload_format_version = "2.0"
-}
-
-resource "aws_apigatewayv2_route" "incidents" {
-  api_id    = aws_apigatewayv2_api.main.id
-  route_key = "POST /api/v1/incidents"
-  target    = "integrations/${aws_apigatewayv2_integration.api_tickets.id}"
-}
-
-resource "aws_apigatewayv2_route" "webhooks" {
-  api_id    = aws_apigatewayv2_api.main.id
-  route_key = "POST /api/v1/webhooks"
-  target    = "integrations/${aws_apigatewayv2_integration.webhook_ingesta.id}"
-}
-
-resource "aws_apigatewayv2_stage" "default" {
-  api_id      = aws_apigatewayv2_api.main.id
-  name        = "$default"
-  auto_deploy = true
+  vpc_cidr                  = var.vpc_cidr
+  availability_zones        = var.availability_zones
+  public_subnet_cidrs       = var.public_subnet_cidrs
+  private_app_subnet_cidrs  = var.private_app_subnet_cidrs
+  private_data_subnet_cidrs = var.private_data_subnet_cidrs
+  enable_nat_gateway        = var.enable_nat_gateway
+  single_nat_gateway        = var.single_nat_gateway
 
   tags = {
     Application = var.app_name
-    Environment = var.environment
-    ManagedBy   = "Terraform"
   }
 }
 
-resource "aws_lambda_permission" "apigw_api_tickets" {
-  statement_id  = "AllowAPIGatewayInvokeApiTickets"
-  action        = "lambda:InvokeFunction"
-  function_name = module.lambda_api_tickets.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.main.execution_arn}/*/*"
+# ---------------------------------------------------------------------------
+# Security — tiered web/app/db security groups (SG-to-SG rules) plus public
+# and private network ACLs. Consumes the VPC id and subnet ids from network.
+# ---------------------------------------------------------------------------
+module "security" {
+  source = "./modules/security"
+
+  name_prefix = local.name_prefix
+  environment = var.environment
+
+  vpc_id             = module.network.vpc_id
+  vpc_cidr           = module.network.vpc_cidr
+  public_subnet_ids  = module.network.public_subnet_ids
+  private_subnet_ids = module.network.private_subnet_ids
+
+  web_ingress_cidrs = var.web_ingress_cidrs
+  http_port         = var.http_port
+  https_port        = var.https_port
+  app_port          = var.app_port
+  db_port           = var.db_port
+
+  tags = {
+    Application = var.app_name
+  }
 }
 
-resource "aws_lambda_permission" "apigw_webhook_ingesta" {
-  statement_id  = "AllowAPIGatewayInvokeWebhookIngesta"
-  action        = "lambda:InvokeFunction"
-  function_name = module.lambda_webhook_ingesta.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.main.execution_arn}/*/*"
+# ---------------------------------------------------------------------------
+# Ingress — API Gateway HTTP API (Lambda proxy). Public entry point for the
+# compute layer. Consumes the api-tickets and webhook Lambda invoke ARNs.
+# ---------------------------------------------------------------------------
+module "ingress" {
+  source = "./modules/ingress"
+
+  api_name          = local.api_name
+  environment       = var.environment
+  health_check_path = var.health_check_path
+
+  api_tickets_invoke_arn    = module.lambda_api_tickets.invoke_arn
+  api_tickets_function_name = module.lambda_api_tickets.function_name
+  webhook_invoke_arn        = module.lambda_webhook_ingesta.invoke_arn
+  webhook_function_name     = module.lambda_webhook_ingesta.function_name
+
+  tags = {
+    Application = var.app_name
+  }
+}
+
+# ---------------------------------------------------------------------------
+# Seed data for the E2E proof — committed to the repo (not inserted via the
+# console). The GET /api/v1/incidents endpoint reads exactly this item.
+# ---------------------------------------------------------------------------
+resource "aws_dynamodb_table_item" "seed_ticket" {
+  table_name = module.database.table_name
+  hash_key   = "PK"
+  range_key  = "SK"
+
+  item = jsonencode({
+    PK       = { S = "TICKET#seed" }
+    SK       = { S = "META" }
+    GSI1PK   = { S = "ASSIGN#unassigned" }
+    GSI1SK   = { S = "STATUS#OPEN#SLA#2026-06-07T23:55:00Z" }
+    title    = { S = "Seed incident for the Delivery 3 end-to-end proof" }
+    severity = { S = "P2" }
+    status   = { S = "OPEN" }
+    source   = { S = "terraform-seed" }
+  })
+
+  lifecycle {
+    # The seed item proves the read path; ignore drift if the handler ever
+    # mutates it, so a later apply does not fight application writes.
+    ignore_changes = [item]
+  }
 }

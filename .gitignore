@@ -29,6 +29,9 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 
+# Claude Code local config / subagent definitions — personal tooling, not part of the deliverable.
+/.claude/
+
 # OS
 .DS_Store
 Thumbs.db
