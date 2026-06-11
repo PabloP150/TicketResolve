@@ -321,6 +321,8 @@ Screenshot de EventBridge Scheduler: `evidence/scheduler.png` _(pendiente de cap
 
 Layout multi-entorno [`envs/dev/`](envs/dev/) y [`envs/staging/`](envs/staging/), Pattern A (backends separados: `backend-dev.hcl` → `env/dev/terraform.tfstate`, `backend-staging.hcl` → `env/staging/terraform.tfstate`). `dev.tfvars` vs `staging.tfvars` difieren en ≥5 valores (vpc_cidr, lambda_memory_default, queue_message_retention_seconds, queue_max_receive_count, sla_sweep_schedule_expression).
 
+**Pull request con el plan-on-PR (recursos async comentados):** el workflow corrió y publicó el `terraform plan` (incluyendo las colas SQS, el event source mapping y el scheduler) como comentario en **[PR #5](https://github.com/PabloP150/TicketResolve/pull/5)** — los tres checks `terraform fmt`/`validate`/`plan` en verde antes del merge.
+
 - **plan-on-PR** ([`terraform-ci.yml`](../.github/workflows/terraform-ci.yml)): tres checks nombrados `terraform fmt` / `terraform validate` / `terraform plan`, sube `tfplan` como artifact y comenta el plan en el PR.
 - **CD on merge** ([`terraform-apply.yml`](../.github/workflows/terraform-apply.yml)): `plan-dev` sube el artifact → `apply-dev` lo **descarga** y hace `terraform apply tfplan` (sin re-plan, sin `-auto-approve`) → `apply-staging` (`environment: staging`) pausa para el reviewer **PabloP150**.
 - **destroy gated** ([`terraform-destroy.yml`](../.github/workflows/terraform-destroy.yml)): solo `workflow_dispatch`, input `environment` (dev/staging), step de confirmación.

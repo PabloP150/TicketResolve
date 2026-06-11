@@ -102,7 +102,8 @@ point at the wrong environment.
 - *Plan-on-PR* (`terraform-ci.yml`): three independent jobs report distinct
   checks — `terraform fmt`, `terraform validate`, `terraform plan`. The plan job
   runs `terraform plan -out=tfplan`, uploads `tfplan` via `actions/upload-artifact`,
-  and posts the plan as a PR comment.
+  and posts the plan as a PR comment. Live example with the async resources plan
+  posted as a comment: [PR #5](https://github.com/PabloP150/TicketResolve/pull/5).
 - *CD on merge* (`terraform-apply.yml`): `plan-dev` runs `terraform plan -out=tfplan`
   and uploads the binary plan (plus the built Lambda zips); `apply-dev`
   **downloads that exact artifact** with `actions/download-artifact` and runs

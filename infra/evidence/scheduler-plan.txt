@@ -1,34 +1,27 @@
-# terraform state show module.sla_sweep_scheduler.aws_scheduler_schedule.this
-# (applied state — EventBridge Scheduler -> escalamiento, Deliverable C)
+# terraform plan -var-file=envs/dev/dev.tfvars  (excerpt — Deliverable C)
+# EventBridge Scheduler -> escalamiento Lambda, dedicated scoped role
 
-# module.sla_sweep_scheduler.aws_scheduler_schedule.this:
-resource "aws_scheduler_schedule" "this" {
-    arn                          = "arn:aws:scheduler:us-east-1:010526283195:schedule/default/ticketresolve-dev-sla-sweep"
-    description                  = null
-    end_date                     = null
-    group_name                   = "default"
-    id                           = "default/ticketresolve-dev-sla-sweep"
-    kms_key_arn                  = null
-    name                         = "ticketresolve-dev-sla-sweep"
-    name_prefix                  = null
-    schedule_expression          = "rate(1 day)"
-    schedule_expression_timezone = "America/Guatemala"
-    start_date                   = null
-    state                        = "ENABLED"
+  # module.sla_sweep_scheduler.aws_scheduler_schedule.this will be created
+  + resource "aws_scheduler_schedule" "this" {
+      + arn                          = (known after apply)
+      + group_name                   = "default"
+      + id                           = (known after apply)
+      + name                         = "ticketresolve-dev-sla-sweep"
+      + name_prefix                  = (known after apply)
+      + schedule_expression          = "rate(1 day)"
+      + schedule_expression_timezone = "America/Guatemala"
+      + state                        = "ENABLED"
 
-    flexible_time_window {
-        maximum_window_in_minutes = 0
-        mode                      = "OFF"
-    }
+      + flexible_time_window {
+          + mode = "OFF"
+        }
 
-    target {
-        arn      = "arn:aws:lambda:us-east-1:010526283195:function:ticketresolve-escalamiento-dev"
-        input    = null
-        role_arn = "arn:aws:iam::010526283195:role/ticketresolve-dev-sla-sweep-invoke"
-
-        retry_policy {
-            maximum_event_age_in_seconds = 86400
-            maximum_retry_attempts       = 185
+      + target {
+          + arn      = (known after apply)
+          + role_arn = (known after apply)
         }
     }
-}
+
+Plan: 95 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
