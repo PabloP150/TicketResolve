@@ -78,7 +78,9 @@ variable "reserved_concurrent_executions" {
   default     = null
 
   validation {
-    condition     = var.reserved_concurrent_executions == null || var.reserved_concurrent_executions >= 0
+    # Ternary (not ||) so the >= 0 comparison is never evaluated against null —
+    # some Terraform versions do not short-circuit validation conditions.
+    condition     = var.reserved_concurrent_executions == null ? true : var.reserved_concurrent_executions >= 0
     error_message = "reserved_concurrent_executions must be null or a non-negative number."
   }
 }
