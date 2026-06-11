@@ -1,36 +1,31 @@
-# terraform state show aws_lambda_event_source_mapping.events_to_notificacion
-# (applied state — SQS -> notificacion consumer, Deliverable B)
+# terraform plan -var-file=envs/dev/dev.tfvars  (excerpt — Deliverable B)
+# SQS events queue -> notificacion consumer via event source mapping
 
-# aws_lambda_event_source_mapping.events_to_notificacion:
-resource "aws_lambda_event_source_mapping" "events_to_notificacion" {
-    arn                                = "arn:aws:lambda:us-east-1:010526283195:event-source-mapping:3a950a06-7293-4869-bf8f-1a6b5492b992"
-    batch_size                         = 10
-    bisect_batch_on_function_error     = false
-    enabled                            = true
-    event_source_arn                   = "arn:aws:sqs:us-east-1:010526283195:ticketresolve-dev-events"
-    function_arn                       = "arn:aws:lambda:us-east-1:010526283195:function:ticketresolve-notificacion-dev"
-    function_name                      = "arn:aws:lambda:us-east-1:010526283195:function:ticketresolve-notificacion-dev"
-    function_response_types            = [
-        "ReportBatchItemFailures",
-    ]
-    id                                 = "3a950a06-7293-4869-bf8f-1a6b5492b992"
-    kms_key_arn                        = null
-    last_modified                      = "2026-06-11T01:36:01Z"
-    last_processing_result             = null
-    maximum_batching_window_in_seconds = 5
-    maximum_record_age_in_seconds      = 0
-    maximum_retry_attempts             = 0
-    parallelization_factor             = 0
-    starting_position                  = null
-    starting_position_timestamp        = null
-    state                              = "Enabled"
-    state_transition_reason            = "USER_INITIATED"
-    tags_all                           = {
-        "Delivery"    = "oyd-delivery-4"
-        "Environment" = "dev"
-        "ManagedBy"   = "Terraform"
-        "Project"     = "ticketresolve"
-    }
-    tumbling_window_in_seconds         = 0
-    uuid                               = "3a950a06-7293-4869-bf8f-1a6b5492b992"
-}
+  # aws_lambda_event_source_mapping.events_to_notificacion will be created
+  + resource "aws_lambda_event_source_mapping" "events_to_notificacion" {
+      + arn                                = (known after apply)
+      + batch_size                         = 10
+      + enabled                            = true
+      + event_source_arn                   = (known after apply)
+      + function_arn                       = (known after apply)
+      + function_name                      = (known after apply)
+      + function_response_types            = [
+          + "ReportBatchItemFailures",
+        ]
+      + id                                 = (known after apply)
+      + last_modified                      = (known after apply)
+      + last_processing_result             = (known after apply)
+      + maximum_batching_window_in_seconds = 5
+      + maximum_record_age_in_seconds      = (known after apply)
+      + maximum_retry_attempts             = (known after apply)
+      + parallelization_factor             = (known after apply)
+      + state                              = (known after apply)
+      + state_transition_reason            = (known after apply)
+      + tags_all                           = {
+          + "Delivery"    = "oyd-delivery-4"
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Project"     = "ticketresolve"
+        }
+      + uuid                               = (known after apply)
+
