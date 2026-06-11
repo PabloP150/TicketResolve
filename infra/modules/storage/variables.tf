@@ -35,6 +35,12 @@ variable "lifecycle_rules" {
   }
 }
 
+variable "force_destroy" {
+  description = "When true, terraform destroy empties the bucket (deleting all objects and versions) before deleting it, so a non-empty bucket does not block the destroy. Keep false for prod-like buckets where accidental data loss must be impossible; set true for ephemeral dev/staging environments that are torn down and rebuilt."
+  type        = bool
+  default     = false
+}
+
 variable "tags" {
   description = "Additional tags to merge on the bucket. The module adds Environment, ManagedBy and Module tags automatically."
   type        = map(string)

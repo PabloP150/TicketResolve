@@ -35,6 +35,12 @@ variable "architecture" {
   }
 }
 
+variable "bucket_force_destroy" {
+  description = "Whether the S3 buckets allow terraform destroy to empty them first. true for ephemeral dev/staging that are torn down and rebuilt; false for prod where accidental data loss must be impossible."
+  type        = bool
+  default     = false
+}
+
 variable "lambda_memory_default" {
   description = "Default memory (MB) for Lambda functions that do not specify their own. Functions with heavier work (reporte-pdf) override this per-call."
   type        = number
