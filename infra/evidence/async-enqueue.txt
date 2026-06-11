@@ -1,0 +1,21 @@
+# Delivery 4 — End-to-end async proof: producer enqueue (seed via curl, not console)
+# Command:
+#   curl -v -X POST -H 'Content-Type: application/json' \
+#     -d '{"event":"sla_breach","ticket":"TICKET-demo","severity":"P1"}' \
+#     https://o2mbl3sx1i.execute-api.us-east-1.amazonaws.com/api/v1/incidents/enqueue
+
+## Verbose (response headers) ##
+> POST /api/v1/incidents/enqueue HTTP/2
+> Host: o2mbl3sx1i.execute-api.us-east-1.amazonaws.com
+< HTTP/2 202 
+< content-type: application/json
+< apigw-requestid: exesHjX6IAMEVFA=
+
+## Response body (HTTP 202 + real SQS MessageId) ##
+{"source": "sqs", "queue_url": "https://sqs.us-east-1.amazonaws.com/010526283195/ticketresolve-dev-events", "message_id": "7e11f39f-7b54-4790-9f43-f2f19b31ec04"}
+
+## Consumer proof (CloudWatch Logs /aws/lambda/ticketresolve-notificacion-dev) ##
+[INFO] processed message_id=7e11f39f-7b54-4790-9f43-f2f19b31ec04 -> s3://ticketresolve-attachments-dev-010526283195/events/7e11f39f-7b54-4790-9f43-f2f19b31ec04.json
+
+## S3 object written by the consumer ##
+events/7e11f39f-7b54-4790-9f43-f2f19b31ec04.json  (227 bytes)

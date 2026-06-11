@@ -120,6 +120,8 @@ resource "aws_lambda_function" "this" {
   memory_size   = var.memory_size
   timeout       = var.timeout
 
+  reserved_concurrent_executions = var.reserved_concurrent_executions
+
   filename         = local.archive_path
   source_code_hash = local.archive_hash
 

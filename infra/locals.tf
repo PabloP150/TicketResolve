@@ -16,4 +16,8 @@ locals {
     notificacion    = "${var.app_name}-notificacion-${var.environment}"
     reporte_pdf     = "${var.app_name}-reporte-pdf-${var.environment}"
   }
+
+  # Delivery 4 — async + scheduler naming, all derived from app_name + environment.
+  queue_name_prefix       = local.name_prefix                # ticketresolve-dev -> queue ticketresolve-dev-events
+  sla_sweep_schedule_name = "${local.name_prefix}-sla-sweep" # EventBridge Scheduler schedule name
 }

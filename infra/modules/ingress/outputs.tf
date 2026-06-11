@@ -22,3 +22,8 @@ output "incidents_url" {
   description = "Fully-qualified URL of the /api/v1/incidents resource (E2E GET/POST endpoint)."
   value       = "${aws_apigatewayv2_api.this.api_endpoint}/api/v1/incidents"
 }
+
+output "enqueue_url" {
+  description = "Fully-qualified URL of the POST /api/v1/incidents/enqueue producer endpoint (Delivery 4 async proof)."
+  value       = "${aws_apigatewayv2_api.this.api_endpoint}/api/v1/incidents/enqueue"
+}

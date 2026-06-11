@@ -88,6 +88,50 @@ output "health_check_url" {
   value       = module.ingress.health_check_url
 }
 
+# --- Async messaging outputs (Delivery 4) ------------------------------------
+
+output "events_queue_url" {
+  description = "URL of the main SQS events queue. Injected into the producer Lambda as QUEUE_URL and used by the seed enqueue in the E2E proof."
+  value       = module.events_queue.queue_url
+}
+
+output "events_queue_arn" {
+  description = "ARN of the main SQS events queue. Scopes the producer/consumer IAM statements and is the event_source_arn of the event source mapping."
+  value       = module.events_queue.queue_arn
+}
+
+output "events_dlq_url" {
+  description = "URL of the dead-letter queue. Inspect ApproximateNumberOfMessages here to see poison messages that exhausted max_receive_count."
+  value       = module.events_queue.dlq_url
+}
+
+output "events_dlq_arn" {
+  description = "ARN of the dead-letter queue."
+  value       = module.events_queue.dlq_arn
+}
+
+output "event_source_mapping_uuid" {
+  description = "UUID of the SQS -> notificacion event source mapping. Confirms the consumer is wired to the queue."
+  value       = aws_lambda_event_source_mapping.events_to_notificacion.uuid
+}
+
+output "enqueue_url" {
+  description = "Public producer endpoint (POST /api/v1/incidents/enqueue) reachable only through the D3 ingress."
+  value       = module.ingress.enqueue_url
+}
+
+# --- Scheduled job outputs (Delivery 4) --------------------------------------
+
+output "sla_sweep_schedule_name" {
+  description = "Name of the EventBridge Scheduler schedule that invokes the escalamiento Lambda."
+  value       = module.sla_sweep_scheduler.schedule_name
+}
+
+output "sla_sweep_schedule_arn" {
+  description = "ARN of the EventBridge Scheduler schedule."
+  value       = module.sla_sweep_scheduler.schedule_arn
+}
+
 # --- Network outputs ---------------------------------------------------------
 
 output "vpc_id" {

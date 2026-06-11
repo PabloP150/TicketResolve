@@ -276,3 +276,99 @@ El seed lo provisiona el recurso `aws_dynamodb_table_item.seed_ticket` (committe
 `plan-on-PR` ([`terraform-ci.yml`](../.github/workflows/terraform-ci.yml)) publica el plan como comentario del PR; `apply-on-merge` ([`terraform-apply.yml`](../.github/workflows/terraform-apply.yml)) aplica al hacer merge a `main`. Link del PR y screenshot del run exitoso: `evidence/ci-plan.png` _(pendiente de captura del run real del PR)_.
 
 ![ci plan run](evidence/ci-plan.png)
+
+---
+
+## Evidence — Delivery 4 (Async Infrastructure & Full CD Pipeline)
+
+Aprovisionado en vivo en la cuenta `010526283195` / `us-east-1`. Resumen completo en [`docs/delivery-4-summary.md`](docs/delivery-4-summary.md).
+Cola SQS `ticketresolve-dev-events`, DLQ `ticketresolve-dev-events-dlq`, schedule `ticketresolve-dev-sla-sweep`.
+
+### Deliverable A — Async Messaging Module (`terraform output`)
+
+Archivo: [`evidence/async-foundation.txt`](evidence/async-foundation.txt)
+
+```text
+events_queue_url          = "https://sqs.us-east-1.amazonaws.com/010526283195/ticketresolve-dev-events"
+events_queue_arn          = "arn:aws:sqs:us-east-1:010526283195:ticketresolve-dev-events"
+events_dlq_url            = "https://sqs.us-east-1.amazonaws.com/010526283195/ticketresolve-dev-events-dlq"
+events_dlq_arn            = "arn:aws:sqs:us-east-1:010526283195:ticketresolve-dev-events-dlq"
+event_source_mapping_uuid = "3a950a06-7293-4869-bf8f-1a6b5492b992"
+enqueue_url               = "https://o2mbl3sx1i.execute-api.us-east-1.amazonaws.com/api/v1/incidents/enqueue"
+sla_sweep_schedule_name   = "ticketresolve-dev-sla-sweep"
+sla_sweep_schedule_arn    = "arn:aws:scheduler:us-east-1:010526283195:schedule/default/ticketresolve-dev-sla-sweep"
+```
+
+Módulo reusable: [`modules/async/`](modules/async/) (SQS main + DLQ con `redrive_policy`, `max_receive_count = 5`), llamado desde el root como `module "events_queue"` sin valores hardcodeados.
+
+### Deliverable B — Event-Driven Compute
+
+Plan/estado del event source mapping (SQS → consumer `notificacion`): [`evidence/event-source-plan.txt`](evidence/event-source-plan.txt) — `batch_size = 10`, `maximum_batching_window_in_seconds = 5`, `function_response_types = ["ReportBatchItemFailures"]`, `event_source_arn` y `function_arn` desde outputs de módulo. IAM del consumer scoped a `sqs:ReceiveMessage/DeleteMessage/GetQueueAttributes` sobre el ARN de la cola (sin wildcards).
+
+Screenshot de la consola (Lambda → Triggers, o SQS → Lambda triggers): `evidence/event-source.png` _(pendiente de captura en consola)_.
+
+![event source mapping wired](evidence/event-source.png)
+
+### Deliverable C — Scheduled Job
+
+Plan/estado del `aws_scheduler_schedule`: [`evidence/scheduler-plan.txt`](evidence/scheduler-plan.txt) — `schedule_expression = "rate(1 day)"`, `schedule_expression_timezone = "America/Guatemala"`, target = `ticketresolve-escalamiento-dev`, rol dedicado `ticketresolve-dev-sla-sweep-invoke` con `lambda:InvokeFunction` scoped al ARN de esa función (sin wildcard).
+
+Screenshot de EventBridge Scheduler: `evidence/scheduler.png` _(pendiente de captura en consola)_.
+
+![eventbridge scheduler rule](evidence/scheduler.png)
+
+### Deliverable D — Full CD Pipeline
+
+Layout multi-entorno [`envs/dev/`](envs/dev/) y [`envs/staging/`](envs/staging/), Pattern A (backends separados: `backend-dev.hcl` → `env/dev/terraform.tfstate`, `backend-staging.hcl` → `env/staging/terraform.tfstate`). `dev.tfvars` vs `staging.tfvars` difieren en ≥5 valores (vpc_cidr, lambda_memory_default, queue_message_retention_seconds, queue_max_receive_count, sla_sweep_schedule_expression).
+
+- **plan-on-PR** ([`terraform-ci.yml`](../.github/workflows/terraform-ci.yml)): tres checks nombrados `terraform fmt` / `terraform validate` / `terraform plan`, sube `tfplan` como artifact y comenta el plan en el PR.
+- **CD on merge** ([`terraform-apply.yml`](../.github/workflows/terraform-apply.yml)): `plan-dev` sube el artifact → `apply-dev` lo **descarga** y hace `terraform apply tfplan` (sin re-plan, sin `-auto-approve`) → `apply-staging` (`environment: staging`) pausa para el reviewer **PabloP150**.
+- **destroy gated** ([`terraform-destroy.yml`](../.github/workflows/terraform-destroy.yml)): solo `workflow_dispatch`, input `environment` (dev/staging), step de confirmación.
+- **drift detection** ([`terraform-drift.yml`](../.github/workflows/terraform-drift.yml)): `schedule` semanal, `plan -detailed-exitcode`, output a `$GITHUB_STEP_SUMMARY`, target dev.
+- **Ruleset** en `main` (Active): PR requerido, status checks fmt/validate/plan, branches up-to-date, bloqueo de force-push y deletion.
+
+Screenshots _(pendientes de captura)_:
+
+| Evidencia | Archivo |
+| --- | --- |
+| Settings → Environments (dev + staging con reviewer) | `evidence/github-environments.png` |
+| Apply a dev automático tras merge | `evidence/ci-apply-dev.png` |
+| Apply a staging con gate + reviewer que aprobó | `evidence/ci-apply-staging.png` |
+| Destroy gated (`workflow_dispatch` visible) | `evidence/ci-destroy.png` |
+| Drift detection (plan en el summary) | `evidence/ci-drift.png` |
+| Settings → Rules → Rulesets (Active, checks fmt/validate/plan) | `evidence/ruleset-config.png` |
+| PR con merge bloqueado por check requerido | `evidence/ruleset-blocked-merge.png` |
+
+![github environments](evidence/github-environments.png)
+![ci apply dev](evidence/ci-apply-dev.png)
+![ci apply staging](evidence/ci-apply-staging.png)
+![ci destroy](evidence/ci-destroy.png)
+![ci drift](evidence/ci-drift.png)
+![ruleset config](evidence/ruleset-config.png)
+![ruleset blocked merge](evidence/ruleset-blocked-merge.png)
+
+### Deliverable E — End-to-End Async Proof
+
+Archivo: [`evidence/async-enqueue.txt`](evidence/async-enqueue.txt) — `curl POST` real al producer (seed por curl, no por consola):
+
+```text
+> POST /api/v1/incidents/enqueue HTTP/2
+< HTTP/2 202
+{"source": "sqs", "queue_url": ".../ticketresolve-dev-events",
+ "message_id": "7e11f39f-7b54-4790-9f43-f2f19b31ec04"}
+
+# Consumer (CloudWatch) — /aws/lambda/ticketresolve-notificacion-dev
+[INFO] processed message_id=7e11f39f-… -> s3://ticketresolve-attachments-dev-010526283195/events/7e11f39f-….json
+```
+
+El consumer (`notificacion`) se dispara **solo** por el event source mapping (no HTTP), lee el mensaje y escribe `events/<messageId>.json` en el bucket de adjuntos. IAM scoped a la cola y al bucket (sin wildcards).
+
+Screenshots _(pendientes de captura)_:
+
+| Evidencia | Archivo |
+| --- | --- |
+| Log del consumer en CloudWatch (message_id procesado) | `evidence/async-consumer.png` |
+| Objeto nuevo en el bucket S3 | `evidence/async-object.png` |
+
+![async consumer log](evidence/async-consumer.png)
+![async object in S3](evidence/async-object.png)

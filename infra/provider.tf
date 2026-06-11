@@ -6,7 +6,7 @@ provider "aws" {
       Project     = var.app_name
       Environment = var.environment
       ManagedBy   = "Terraform"
-      Delivery    = "oyd-delivery-1"
+      Delivery    = "oyd-delivery-4"
     }
   }
 }
