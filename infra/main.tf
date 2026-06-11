@@ -8,8 +8,9 @@ data "aws_caller_identity" "current" {}
 module "attachments_bucket" {
   source = "./modules/storage"
 
-  bucket_name = local.attachments_bucket_name
-  environment = var.environment
+  bucket_name   = local.attachments_bucket_name
+  environment   = var.environment
+  force_destroy = var.bucket_force_destroy
 
   lifecycle_rules = [
     {
@@ -30,8 +31,9 @@ module "attachments_bucket" {
 module "reports_bucket" {
   source = "./modules/storage"
 
-  bucket_name = local.reports_bucket_name
-  environment = var.environment
+  bucket_name   = local.reports_bucket_name
+  environment   = var.environment
+  force_destroy = var.bucket_force_destroy
 
   lifecycle_rules = [
     {

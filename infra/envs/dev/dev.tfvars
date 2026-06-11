@@ -50,3 +50,6 @@ scheduler_timezone            = "America/Guatemala"
 
 # NOTE: db_password is intentionally NOT set here. It is injected at apply time
 # from the GitHub Environment secret DEV_DB_PASSWORD as TF_VAR_db_password.
+
+# Ephemeral env: allow destroy to empty buckets so teardown/rebuild is one command.
+bucket_force_destroy = true
