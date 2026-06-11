@@ -63,6 +63,26 @@ module "database" {
 }
 
 # ---------------------------------------------------------------------------
+# Async messaging (Delivery 4) — SQS events queue + DLQ. All settings flow from
+# root variables / <env>.tfvars; the producer (api-tickets) and the consumer
+# (notificacion, via an event source mapping) are wired to its outputs below.
+# ---------------------------------------------------------------------------
+module "events_queue" {
+  source = "./modules/async"
+
+  queue_name_prefix             = local.queue_name_prefix
+  visibility_timeout_seconds    = var.queue_visibility_timeout_seconds
+  message_retention_seconds     = var.queue_message_retention_seconds
+  max_receive_count             = var.queue_max_receive_count
+  dlq_message_retention_seconds = var.dlq_message_retention_seconds
+
+  tags = {
+    Application = var.app_name
+    Environment = var.environment
+  }
+}
+
+# ---------------------------------------------------------------------------
 # Compute — five Lambdas, each instantiated from the same compute module with
 # per-function memory, timeout and scoped IAM statements (no wildcards).
 # Statements reference module.database.table_arn and bucket ARNs so module
@@ -106,6 +126,8 @@ module "lambda_api_tickets" {
   environment_variables = {
     TABLE_NAME         = module.database.table_name
     ATTACHMENTS_BUCKET = module.attachments_bucket.bucket_name
+    # Delivery 4 — producer target queue, wired from the async module output.
+    QUEUE_URL = module.events_queue.queue_url
   }
 
   additional_iam_statements = [
@@ -123,6 +145,12 @@ module "lambda_api_tickets" {
       sid       = "S3AttachmentsList"
       actions   = ["s3:ListBucket"]
       resources = [module.attachments_bucket.bucket_arn]
+    },
+    {
+      # Delivery 4 producer — enqueue only, scoped to the events queue ARN.
+      sid       = "SQSEnqueueEvents"
+      actions   = ["sqs:SendMessage", "sqs:GetQueueAttributes"]
+      resources = [module.events_queue.queue_arn]
     },
   ]
 }
@@ -175,11 +203,57 @@ module "lambda_notificacion" {
   function_name = local.lambda_names.notificacion
   environment   = var.environment
   memory_size   = var.lambda_memory_default
-  timeout       = 30
+  # Consumer timeout (60s) must be <= the queue visibility timeout (90s) so a
+  # slow invocation cannot let the same message be re-delivered mid-flight.
+  timeout = 60
 
-  # No additional statements at this stage — SNS/SQS targets land in Delivery 4.
-  # The Lambda already has logs:* via the module's built-in execution role.
-  additional_iam_statements = []
+  # Delivery 4 — real async consumer handler: reads SQS records, writes to S3.
+  source_dir = "${path.module}/lambda_src/notificacion"
+
+  # Bound concurrency so a queue flood cannot exhaust downstream throughput.
+  reserved_concurrent_executions = var.consumer_reserved_concurrency
+
+  environment_variables = {
+    ATTACHMENTS_BUCKET = module.attachments_bucket.bucket_name
+    # Sensitive credential for the reserved data layer, injected via
+    # TF_VAR_db_password (GitHub Environment secret) — never from a .tfvars file.
+    DB_PASSWORD = var.db_password
+  }
+
+  additional_iam_statements = [
+    {
+      # Event source mapping needs these three actions on the specific queue ARN.
+      sid       = "SQSConsumeEvents"
+      actions   = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"]
+      resources = [module.events_queue.queue_arn]
+    },
+    {
+      # Consumer writes one object per message, scoped to the attachments bucket.
+      sid       = "S3WriteEventObjects"
+      actions   = ["s3:PutObject"]
+      resources = ["${module.attachments_bucket.bucket_arn}/*"]
+    },
+  ]
+}
+
+# ---------------------------------------------------------------------------
+# Event-driven compute (Delivery 4, Deliverable B) — connect the SQS events
+# queue to the notificacion consumer. Queue ARN and function name come from
+# module outputs (no hardcoded ARNs). Batch and bisect settings are variables.
+# ---------------------------------------------------------------------------
+resource "aws_lambda_event_source_mapping" "events_to_notificacion" {
+  event_source_arn                   = module.events_queue.queue_arn
+  function_name                      = module.lambda_notificacion.function_arn
+  batch_size                         = var.event_source_batch_size
+  maximum_batching_window_in_seconds = var.event_source_max_batching_window_seconds
+
+  # bisect-on-error is a Kinesis/DynamoDB-stream concept. The SQS equivalent for
+  # isolating a poison message from its batch is partial batch responses: the
+  # handler returns the failed messageIds and only those go back to the queue
+  # (eventually to the DLQ), instead of re-failing the whole batch.
+  function_response_types = var.event_source_bisect_on_error ? ["ReportBatchItemFailures"] : []
+
+  enabled = true
 }
 
 module "lambda_reporte_pdf" {
@@ -274,6 +348,28 @@ module "ingress" {
   api_tickets_function_name = module.lambda_api_tickets.function_name
   webhook_invoke_arn        = module.lambda_webhook_ingesta.invoke_arn
   webhook_function_name     = module.lambda_webhook_ingesta.function_name
+
+  tags = {
+    Application = var.app_name
+  }
+}
+
+# ---------------------------------------------------------------------------
+# Scheduled job (Delivery 4, Deliverable C) — EventBridge Scheduler invokes the
+# escalamiento Lambda on a cadence to sweep open tickets past their SLA. This
+# target is DISTINCT from the async consumer (notificacion). The scheduler's
+# dedicated role may only lambda:InvokeFunction the escalamiento ARN — narrower
+# than escalamiento's own role (which can read/write DynamoDB).
+# ---------------------------------------------------------------------------
+module "sla_sweep_scheduler" {
+  source = "./modules/scheduler"
+
+  schedule_name       = local.sla_sweep_schedule_name
+  schedule_expression = var.sla_sweep_schedule_expression
+  scheduler_timezone  = var.scheduler_timezone
+  target_lambda_arn   = module.lambda_escalamiento.function_arn
+  target_lambda_name  = module.lambda_escalamiento.function_name
+  environment         = var.environment
 
   tags = {
     Application = var.app_name

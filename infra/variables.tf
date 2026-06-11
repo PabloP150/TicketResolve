@@ -3,8 +3,8 @@ variable "environment" {
   type        = string
 
   validation {
-    condition     = contains(["dev", "prod"], var.environment)
-    error_message = "environment must be either 'dev' or 'prod'."
+    condition     = contains(["dev", "staging", "prod"], var.environment)
+    error_message = "environment must be one of 'dev', 'staging' or 'prod'."
   }
 }
 
@@ -129,4 +129,79 @@ variable "health_check_path" {
   description = "Path exposed as the ingress health/readiness check (routed GET to the api-tickets Lambda)."
   type        = string
   default     = "/"
+}
+
+# --- Async messaging (Delivery 4) -------------------------------------------
+
+variable "queue_visibility_timeout_seconds" {
+  description = "SQS main queue visibility timeout. Must be >= the consumer Lambda timeout (60s) so a slow invocation does not trigger a duplicate delivery before it finishes."
+  type        = number
+  default     = 90
+}
+
+variable "queue_message_retention_seconds" {
+  description = "How long the main SQS queue keeps an unconsumed message, in seconds. Differs between dev and staging to demonstrate the multi-environment layout."
+  type        = number
+  default     = 345600 # 4 days
+}
+
+variable "queue_max_receive_count" {
+  description = "Number of failed receives before a message is moved from the main queue to the DLQ via the redrive_policy."
+  type        = number
+  default     = 5
+}
+
+variable "dlq_message_retention_seconds" {
+  description = "How long the dead-letter queue keeps a failed message, in seconds. Longer than the main queue retention so operators can inspect and replay poison messages."
+  type        = number
+  default     = 1209600 # 14 days (max)
+}
+
+# --- Event-driven compute (Delivery 4) --------------------------------------
+
+variable "event_source_batch_size" {
+  description = "Maximum number of SQS messages the event source mapping delivers to the consumer Lambda in a single invocation."
+  type        = number
+  default     = 10
+}
+
+variable "event_source_max_batching_window_seconds" {
+  description = "Maximum seconds the event source mapping waits to gather a full batch before invoking the consumer. Trades latency for fewer invocations."
+  type        = number
+  default     = 5
+}
+
+variable "event_source_bisect_on_error" {
+  description = "When true, enables SQS partial batch responses (ReportBatchItemFailures) on the event source mapping so a single poison message is isolated and only it is retried / dead-lettered — the SQS analogue of bisect-on-error (which itself applies only to Kinesis/DynamoDB stream sources). The consumer returns the failed messageIds in batchItemFailures."
+  type        = bool
+  default     = true
+}
+
+variable "consumer_reserved_concurrency" {
+  description = "Reserved concurrency cap for the SQS consumer (notificacion) Lambda. Bounds how many invocations run at once so a queue flood cannot exhaust downstream throughput (DynamoDB/RDS). NOTE: this AWS account is unverified and its total concurrency limit is the floor of 10, where AWS requires >= 10 unreserved — so any reservation is rejected. Left null until a concurrency-limit increase is granted; the module fully supports a numeric value for prod."
+  type        = number
+  default     = null
+}
+
+# --- Scheduled job (Delivery 4) ---------------------------------------------
+
+variable "sla_sweep_schedule_expression" {
+  description = "EventBridge Scheduler expression for the SLA-sweep run of the escalamiento Lambda. rate(...) or cron(...). Frequency differs between dev and staging."
+  type        = string
+  default     = "rate(1 day)"
+}
+
+variable "scheduler_timezone" {
+  description = "IANA time zone the scheduler expression is evaluated in."
+  type        = string
+  default     = "America/Guatemala"
+}
+
+# --- Sensitive runtime credential (Delivery 4) ------------------------------
+
+variable "db_password" {
+  description = "Sensitive runtime credential for the reserved data layer (future RDS cutover). Injected from a GitHub Environment secret as TF_VAR_db_password — never committed to a .tfvars file. Passed to the consumer Lambda as an environment variable."
+  type        = string
+  default     = "" # overridden per-environment via TF_VAR_db_password (env secret)
+  sensitive   = true
 }

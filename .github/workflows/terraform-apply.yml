@@ -1,7 +1,7 @@
-name: Terraform Apply
+name: Terraform CD
 
-# Apply-on-merge: when a PR is merged to main, provision the infrastructure
-# (networking, security, ingress, compute, storage, database) against dev.
+# Apply-on-merge with environment promotion:
+#   merge to main -> plan-dev -> apply-dev (auto) -> apply-staging (reviewer gate)
 on:
   push:
     branches: [main]
@@ -9,23 +9,27 @@ on:
       - "infra/**"
       - ".github/workflows/terraform-apply.yml"
 
-# Avoid overlapping applies racing for the same remote state lock.
+# Never let two CD runs race for the same remote state lock.
 concurrency:
-  group: terraform-apply-main
+  group: terraform-cd-main
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: infra/
+
 jobs:
-  apply:
-    name: Apply (dev)
+  # ---------------------------------------------------------------------------
+  # 1) Plan dev and SAVE the binary plan as an artifact. The apply job consumes
+  #    this exact plan instead of re-planning, so what is reviewed is what runs.
+  # ---------------------------------------------------------------------------
+  plan-dev:
+    name: Plan (dev)
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-
-    defaults:
-      run:
-        working-directory: infra/
-
+    environment: dev
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,8 +46,97 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Terraform Init
-        run: terraform init -input=false -lock-timeout=120s
+      - name: Terraform Init (dev backend)
+        run: terraform init -input=false -lock-timeout=120s -backend-config=envs/dev/backend-dev.hcl
 
-      - name: Terraform Apply
-        run: terraform apply -auto-approve -input=false -lock-timeout=120s -var-file=envs/dev/dev.tfvars
+      - name: Terraform Plan (dev)
+        env:
+          TF_VAR_db_password: ${{ secrets.DEV_DB_PASSWORD }}
+        run: terraform plan -input=false -lock-timeout=120s -var-file=envs/dev/dev.tfvars -out=tfplan
+
+      # Carry the plan AND the built Lambda packages so apply uploads the exact
+      # bytes that were planned (apply does not re-read the archive data source).
+      - name: Upload dev plan artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-dev-${{ github.sha }}
+          path: |
+            infra/tfplan
+            infra/modules/compute/build/*.zip
+          retention-days: 5
+
+  # ---------------------------------------------------------------------------
+  # 2) Apply dev automatically using the DOWNLOADED plan artifact (no re-plan).
+  # ---------------------------------------------------------------------------
+  apply-dev:
+    name: Apply (dev)
+    runs-on: ubuntu-latest
+    needs: plan-dev
+    environment: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.8"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Download dev plan artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-dev-${{ github.sha }}
+          path: infra/
+
+      - name: Terraform Init (dev backend)
+        run: terraform init -input=false -lock-timeout=120s -backend-config=envs/dev/backend-dev.hcl
+
+      # Apply the saved plan file — NOT -auto-approve, NOT a fresh plan.
+      - name: Terraform Apply (dev)
+        run: terraform apply -input=false -lock-timeout=120s tfplan
+
+  # ---------------------------------------------------------------------------
+  # 3) Promote to staging. The staging GitHub Environment has a required
+  #    reviewer, so this job pauses for manual approval before it plans/applies.
+  #    Uses its own remote-state backend and STAGING_DB_PASSWORD secret.
+  # ---------------------------------------------------------------------------
+  apply-staging:
+    name: Apply (staging)
+    runs-on: ubuntu-latest
+    needs: apply-dev
+    environment: staging
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.8"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Terraform Init (staging backend)
+        run: terraform init -input=false -lock-timeout=120s -backend-config=envs/staging/backend-staging.hcl
+
+      - name: Terraform Plan (staging)
+        env:
+          TF_VAR_db_password: ${{ secrets.STAGING_DB_PASSWORD }}
+        run: terraform plan -input=false -lock-timeout=120s -var-file=envs/staging/staging.tfvars -out=tfplan
+
+      # Apply the plan produced moments ago in this gated job (saved plan, not
+      # -auto-approve). The single approval above gates the whole job.
+      - name: Terraform Apply (staging)
+        run: terraform apply -input=false -lock-timeout=120s tfplan

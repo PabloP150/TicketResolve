@@ -1,0 +1,63 @@
+name: Terraform Destroy (manual)
+
+# Destructive by design — therefore workflow_dispatch ONLY. No push, no
+# pull_request, no schedule trigger. An operator must launch it from the Actions
+# UI and pick the environment.
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to destroy"
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+
+concurrency:
+  group: terraform-cd-main
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: infra/
+
+jobs:
+  destroy:
+    name: Destroy (${{ inputs.environment }})
+    runs-on: ubuntu-latest
+    # Same GitHub Environment as apply, so destroying staging still requires the
+    # configured reviewer to approve.
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Confirm target
+        run: |
+          echo "Destroying environment: ${{ inputs.environment }}"
+          echo "Backend config: envs/${{ inputs.environment }}/backend-${{ inputs.environment }}.hcl"
+          echo "Var file:       envs/${{ inputs.environment }}/${{ inputs.environment }}.tfvars"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~> 1.8"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Terraform Init (${{ inputs.environment }} backend)
+        run: terraform init -input=false -lock-timeout=120s -backend-config=envs/${{ inputs.environment }}/backend-${{ inputs.environment }}.hcl
+
+      # db_password defaults to "" and only feeds a Lambda env var that is being
+      # destroyed here, so no secret injection is needed on the destroy path.
+      - name: Terraform Destroy (${{ inputs.environment }})
+        run: terraform destroy -auto-approve -input=false -lock-timeout=120s -var-file=envs/${{ inputs.environment }}/${{ inputs.environment }}.tfvars

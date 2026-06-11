@@ -72,6 +72,17 @@ variable "additional_iam_statements" {
   }
 }
 
+variable "reserved_concurrent_executions" {
+  description = "Caps the number of concurrent executions of this function. Set on the SQS consumer so a flood of queue messages cannot spawn enough concurrent invocations to exhaust a downstream connection pool (DynamoDB/RDS). null (default) leaves the function on the shared unreserved pool."
+  type        = number
+  default     = null
+
+  validation {
+    condition     = var.reserved_concurrent_executions == null || var.reserved_concurrent_executions >= 0
+    error_message = "reserved_concurrent_executions must be null or a non-negative number."
+  }
+}
+
 variable "log_retention_in_days" {
   description = "Retention for the Lambda's CloudWatch log group. 14 days is enough for the academic project and stays inside the free tier of CloudWatch Logs ingestion."
   type        = number

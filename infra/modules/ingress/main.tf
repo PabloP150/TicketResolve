@@ -62,6 +62,13 @@ resource "aws_apigatewayv2_route" "incidents_post" {
   target    = "integrations/${aws_apigatewayv2_integration.api_tickets.id}"
 }
 
+# Delivery 4 producer — the handler puts the body on the SQS queue and returns 202.
+resource "aws_apigatewayv2_route" "incidents_enqueue_post" {
+  api_id    = aws_apigatewayv2_api.this.id
+  route_key = "POST /api/v1/incidents/enqueue"
+  target    = "integrations/${aws_apigatewayv2_integration.api_tickets.id}"
+}
+
 resource "aws_apigatewayv2_route" "webhooks_post" {
   api_id    = aws_apigatewayv2_api.this.id
   route_key = "POST /api/v1/webhooks"
