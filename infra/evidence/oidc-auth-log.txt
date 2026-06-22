@@ -1,0 +1,17 @@
+# Delivery 5 — Deliverable C — OIDC token exchange in a live CI run (PR #10, run 27990715702)
+# The 'terraform plan' job authenticated via GitHub OIDC (role-to-assume), no access keys.
+# ============================================================================
+terraform plan  Configure AWS credentials (OIDC)  ﻿2026-06-22T23:20:26.9246258Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+terraform plan  Configure AWS credentials (OIDC)  2026-06-22T23:20:26.9247524Z ##[group]Run aws-actions/configure-aws-credentials@v4
+terraform plan  Configure AWS credentials (OIDC)  2026-06-22T23:20:26.9247844Z with:
+terraform plan  Configure AWS credentials (OIDC)  2026-06-22T23:20:26.9248165Z   role-to-assume: arn:aws:iam::010526283195:role/ticketresolve-dev-ci-runner
+terraform plan  Configure AWS credentials (OIDC)  2026-06-22T23:20:26.9248696Z   aws-region: ***
+terraform plan  Configure AWS credentials (OIDC)  2026-06-22T23:20:26.9248939Z   audience: sts.amazonaws.com
+terraform plan  Configure AWS credentials (OIDC)  2026-06-22T23:20:26.9249239Z   output-env-credentials: true
+terraform plan  Configure AWS credentials (OIDC)  2026-06-22T23:20:26.9249496Z env:
+terraform plan  Configure AWS credentials (OIDC)  2026-06-22T23:20:26.9249833Z   TERRAFORM_CLI_PATH: /home/runner/work/_temp/230665f9-3edd-43e8-a8f5-1deab0339eaf
+terraform plan  Configure AWS credentials (OIDC)  2026-06-22T23:20:26.9250392Z ##[endgroup]
+terraform plan  Configure AWS credentials (OIDC)  2026-06-22T23:20:27.2490582Z Assuming role with OIDC
+terraform plan  Configure AWS credentials (OIDC)  2026-06-22T23:20:27.4721909Z Authenticated as assumedRoleId AROAQE43KKW5XM7LAXYNS:GitHubActions
+terraform plan  Post Configure AWS credentials (OIDC)  ﻿2026-06-22T23:20:53.9134437Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+terraform plan  Post Configure AWS credentials (OIDC)  2026-06-22T23:20:53.9135698Z Post job cleanup.
