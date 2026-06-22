@@ -20,4 +20,20 @@ locals {
   # Delivery 4 — async + scheduler naming, all derived from app_name + environment.
   queue_name_prefix       = local.name_prefix                # ticketresolve-dev -> queue ticketresolve-dev-events
   sla_sweep_schedule_name = "${local.name_prefix}-sla-sweep" # EventBridge Scheduler schedule name
+
+  # Delivery 5 — identifiers constructed as strings (not module outputs) so the
+  # iam / security_kms modules can reference them without creating dependency
+  # cycles (iam role <- needs lambda ARN; lambda <- needs iam role).
+  account_id = data.aws_caller_identity.current.account_id
+  region     = data.aws_region.current.name
+
+  escalamiento_function_arn = "arn:aws:lambda:${local.region}:${local.account_id}:function:${local.lambda_names.escalamiento}"
+  ci_runner_role_arn        = "arn:aws:iam::${local.account_id}:role/${local.name_prefix}-ci-runner"
+
+  # KMS key administrators: the human deployer running terraform locally, plus
+  # the CI runner role that runs terraform in GitHub Actions.
+  kms_key_admin_principal_arns = [
+    data.aws_caller_identity.current.arn,
+    local.ci_runner_role_arn,
+  ]
 }

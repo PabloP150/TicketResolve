@@ -1,0 +1,316 @@
+# Delivery 5 — Deliverable A (IAM Security Module) — deployed roles, policies & attachments
+# ============================================================================
+# Every Lambda/scheduler service role below uses enumerated Actions and concrete
+# Resource ARNs — NO wildcard Action or Resource. The CI runner role uses per-service
+# actions with Resource '*' (a deploy role must create resources whose ARNs do not
+# exist yet) — documented as an accepted exception in delivery-5-summary.md.
+
+## terraform state — IAM resources (roles, policies, attachments, OIDC provider):
+  module.iam.data.aws_iam_policy_document.async_consumer
+  module.iam.data.aws_iam_policy_document.ci_runner
+  module.iam.data.aws_iam_policy_document.ci_runner_assume
+  module.iam.data.aws_iam_policy_document.compute_api
+  module.iam.data.aws_iam_policy_document.compute_escalamiento
+  module.iam.data.aws_iam_policy_document.compute_reporte
+  module.iam.data.aws_iam_policy_document.compute_webhook
+  module.iam.data.aws_iam_policy_document.lambda_assume
+  module.iam.data.aws_iam_policy_document.scheduler
+  module.iam.data.aws_iam_policy_document.scheduler_assume
+  module.iam.aws_iam_openid_connect_provider.github
+  module.iam.aws_iam_policy.async_consumer
+  module.iam.aws_iam_policy.ci_runner
+  module.iam.aws_iam_policy.compute_api
+  module.iam.aws_iam_policy.compute_escalamiento
+  module.iam.aws_iam_policy.compute_reporte
+  module.iam.aws_iam_policy.compute_webhook
+  module.iam.aws_iam_policy.scheduler
+  module.iam.aws_iam_role.async_consumer
+  module.iam.aws_iam_role.ci_runner
+  module.iam.aws_iam_role.compute_api
+  module.iam.aws_iam_role.compute_escalamiento
+  module.iam.aws_iam_role.compute_reporte
+  module.iam.aws_iam_role.compute_webhook
+  module.iam.aws_iam_role.scheduler
+  module.iam.aws_iam_role_policy_attachment.async_consumer
+  module.iam.aws_iam_role_policy_attachment.ci_runner
+  module.iam.aws_iam_role_policy_attachment.compute_api
+  module.iam.aws_iam_role_policy_attachment.compute_escalamiento
+  module.iam.aws_iam_role_policy_attachment.compute_reporte
+  module.iam.aws_iam_role_policy_attachment.compute_webhook
+  module.iam.aws_iam_role_policy_attachment.scheduler
+
+## Deployed managed-policy documents (aws iam get-policy-version):
+
+### ticketresolve-dev-compute-api
+{
+    "Statement": [
+        {
+            "Action": [
+                "dynamodb:UpdateItem",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:PutItem",
+                "dynamodb:GetItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:BatchGetItem"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:dynamodb:us-east-1:010526283195:table/ticketresolve-dev/index/GSI2",
+                "arn:aws:dynamodb:us-east-1:010526283195:table/ticketresolve-dev/index/GSI1",
+                "arn:aws:dynamodb:us-east-1:010526283195:table/ticketresolve-dev"
+            ],
+            "Sid": "DynamoDBReadWrite"
+        },
+        {
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObject"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::ticketresolve-attachments-dev-010526283195/*",
+            "Sid": "S3AttachmentsObjects"
+        },
+        {
+            "Action": "s3:ListBucket",
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::ticketresolve-attachments-dev-010526283195",
+            "Sid": "S3AttachmentsList"
+        },
+        {
+            "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:sqs:us-east-1:010526283195:ticketresolve-dev-events",
+            "Sid": "SQSSendEvents"
+        },
+        {
+            "Action": [
+                "kms:GenerateDataKey",
+                "kms:Decrypt"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:kms:us-east-1:010526283195:key/8da89dc4-6ad3-445f-8382-fc04637cdd35",
+            "Sid": "UseCMKForS3"
+        },
+        {
+            "Action": [
+                "logs:PutLogEvents",
+                "logs:CreateLogStream"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:logs:us-east-1:010526283195:log-group:/aws/lambda/ticketresolve-api-tickets-dev:*",
+            "Sid": "WriteOwnLogs"
+        }
+    ],
+    "Version": "2012-10-17"
+}
+
+### ticketresolve-dev-compute-webhook
+{
+    "Statement": [
+        {
+            "Action": [
+                "dynamodb:UpdateItem",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:PutItem",
+                "dynamodb:GetItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:BatchGetItem"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:dynamodb:us-east-1:010526283195:table/ticketresolve-dev/index/GSI2",
+                "arn:aws:dynamodb:us-east-1:010526283195:table/ticketresolve-dev/index/GSI1",
+                "arn:aws:dynamodb:us-east-1:010526283195:table/ticketresolve-dev"
+            ],
+            "Sid": "DynamoDBReadWrite"
+        },
+        {
+            "Action": [
+                "logs:PutLogEvents",
+                "logs:CreateLogStream"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:logs:us-east-1:010526283195:log-group:/aws/lambda/ticketresolve-webhook-ingesta-dev:*",
+            "Sid": "WriteOwnLogs"
+        }
+    ],
+    "Version": "2012-10-17"
+}
+
+### ticketresolve-dev-compute-escalamiento
+{
+    "Statement": [
+        {
+            "Action": [
+                "dynamodb:UpdateItem",
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:PutItem",
+                "dynamodb:GetItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:BatchGetItem"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:dynamodb:us-east-1:010526283195:table/ticketresolve-dev/index/GSI2",
+                "arn:aws:dynamodb:us-east-1:010526283195:table/ticketresolve-dev/index/GSI1",
+                "arn:aws:dynamodb:us-east-1:010526283195:table/ticketresolve-dev"
+            ],
+            "Sid": "DynamoDBReadWrite"
+        },
+        {
+            "Action": [
+                "logs:PutLogEvents",
+                "logs:CreateLogStream"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:logs:us-east-1:010526283195:log-group:/aws/lambda/ticketresolve-escalamiento-dev:*",
+            "Sid": "WriteOwnLogs"
+        }
+    ],
+    "Version": "2012-10-17"
+}
+
+### ticketresolve-dev-async-consumer
+{
+    "Statement": [
+        {
+            "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:DeleteMessage"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:sqs:us-east-1:010526283195:ticketresolve-dev-events",
+            "Sid": "SQSConsumeEvents"
+        },
+        {
+            "Action": "s3:PutObject",
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::ticketresolve-attachments-dev-010526283195/*",
+            "Sid": "S3WriteEventObjects"
+        },
+        {
+            "Action": "secretsmanager:GetSecretValue",
+            "Effect": "Allow",
+            "Resource": "arn:aws:secretsmanager:us-east-1:010526283195:secret:ticketresolve-dev-db-password-dHnYk0",
+            "Sid": "ReadDBPasswordSecret"
+        },
+        {
+            "Action": [
+                "kms:GenerateDataKey",
+                "kms:Decrypt"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:kms:us-east-1:010526283195:key/8da89dc4-6ad3-445f-8382-fc04637cdd35",
+            "Sid": "UseCMK"
+        },
+        {
+            "Action": [
+                "logs:PutLogEvents",
+                "logs:CreateLogStream"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:logs:us-east-1:010526283195:log-group:/aws/lambda/ticketresolve-notificacion-dev:*",
+            "Sid": "WriteOwnLogs"
+        }
+    ],
+    "Version": "2012-10-17"
+}
+
+### ticketresolve-dev-compute-reporte
+{
+    "Statement": [
+        {
+            "Action": [
+                "dynamodb:Scan",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchGetItem"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:dynamodb:us-east-1:010526283195:table/ticketresolve-dev/index/GSI2",
+                "arn:aws:dynamodb:us-east-1:010526283195:table/ticketresolve-dev/index/GSI1",
+                "arn:aws:dynamodb:us-east-1:010526283195:table/ticketresolve-dev"
+            ],
+            "Sid": "DynamoDBReadOnly"
+        },
+        {
+            "Action": "s3:PutObject",
+            "Effect": "Allow",
+            "Resource": "arn:aws:s3:::ticketresolve-reports-dev-010526283195/*",
+            "Sid": "S3ReportsWrite"
+        },
+        {
+            "Action": [
+                "kms:GenerateDataKey",
+                "kms:Decrypt"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:kms:us-east-1:010526283195:key/8da89dc4-6ad3-445f-8382-fc04637cdd35",
+            "Sid": "UseCMKForS3"
+        },
+        {
+            "Action": [
+                "logs:PutLogEvents",
+                "logs:CreateLogStream"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:logs:us-east-1:010526283195:log-group:/aws/lambda/ticketresolve-reporte-pdf-dev:*",
+            "Sid": "WriteOwnLogs"
+        }
+    ],
+    "Version": "2012-10-17"
+}
+
+### ticketresolve-dev-scheduler-invoke
+{
+    "Statement": [
+        {
+            "Action": "lambda:InvokeFunction",
+            "Effect": "Allow",
+            "Resource": "arn:aws:lambda:us-east-1:010526283195:function:ticketresolve-escalamiento-dev",
+            "Sid": "InvokeEscalamiento"
+        }
+    ],
+    "Version": "2012-10-17"
+}
+
+## CI runner trust policy (OIDC, scoped to repo subjects):
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "GitHubOIDCAssume",
+            "Effect": "Allow",
+            "Principal": {
+                "Federated": "arn:aws:iam::010526283195:oidc-provider/token.actions.githubusercontent.com"
+            },
+            "Action": "sts:AssumeRoleWithWebIdentity",
+            "Condition": {
+                "StringEquals": {
+                    "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+                    "token.actions.githubusercontent.com:sub": [
+                        "repo:PabloP150/TicketResolve:ref:refs/heads/main",
+                        "repo:PabloP150/TicketResolve:environment:dev",
+                        "repo:PabloP150/TicketResolve:environment:staging"
+                    ]
+                }
+            }
+        }
+    ]
+}

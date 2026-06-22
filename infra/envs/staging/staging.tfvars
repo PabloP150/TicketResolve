@@ -55,3 +55,21 @@ scheduler_timezone            = "America/Guatemala"
 
 # Ephemeral env: allow destroy to empty buckets so teardown/rebuild is one command.
 bucket_force_destroy = true
+
+# --- TLS (Delivery 5, Deliverable D) ---
+# Same delegated zone as dev; the root module suffixes the labels per
+# environment (api-staging / app-staging) so the two never collide.
+dns_subdomain = "grupo7.oyd.solid.com.gt"
+
+# --- Observability (Delivery 5, Deliverable E) ---
+# DIFFERS from dev (14): staging keeps logs longer to mirror a pre-prod audit
+# window, and runs a slightly larger budget for its heavier load profile.
+log_retention_days                    = 30
+alarm_notification_email              = "pablo.pineda@galileo.edu"
+lambda_error_threshold                = 1
+apigw_5xx_threshold                   = 2
+dlq_depth_threshold                   = 1
+alarm_period_seconds                  = 300
+alarm_evaluation_periods              = 1
+monthly_budget_usd                    = 10
+budget_notification_threshold_percent = 80

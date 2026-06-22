@@ -66,8 +66,12 @@ resource "aws_dynamodb_table" "this" {
     enabled        = true
   }
 
+  # Delivery 5: encrypt at rest with the project CMK when provided. When
+  # kms_key_arn is null DynamoDB uses the AWS-owned key (still encrypted, but
+  # not customer-managed).
   server_side_encryption {
-    enabled = true
+    enabled     = true
+    kms_key_arn = var.kms_key_arn
   }
 
   point_in_time_recovery {

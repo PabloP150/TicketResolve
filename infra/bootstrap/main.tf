@@ -73,3 +73,27 @@ resource "aws_dynamodb_table" "lock" {
     prevent_destroy = true
   }
 }
+
+# ===========================================================================
+# Delegated DNS zone for TLS (Delivery 5, Deliverable D).
+# Lives in the bootstrap workspace — NOT the main workspace — so it survives
+# `terraform destroy` on main. That keeps the four name servers stable: the
+# instructor delegates grupo7.oyd.solid.com.gt to these NS ONCE, and the
+# one-click destroy/re-apply cycle on the main workspace never invalidates the
+# delegation (recreating the zone would assign new NS and break it).
+# After `terraform apply` here, send var.dns_subdomain + the name_servers
+# output to the instructor.
+# ===========================================================================
+resource "aws_route53_zone" "delegated" {
+  name    = var.dns_subdomain
+  comment = "TicketResolve delegated subdomain for Delivery 5 TLS. NS delegated from the parent oyd.solid.com.gt by the instructor."
+
+  tags = merge(local.common_tags, {
+    Name      = var.dns_subdomain
+    Component = "dns"
+  })
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}

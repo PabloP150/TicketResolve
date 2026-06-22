@@ -1,4 +1,56 @@
 data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
+# ---------------------------------------------------------------------------
+# Security foundation (Delivery 5) — the CMK + Secrets Manager secret (B) and
+# the centralized IAM roles + GitHub OIDC provider (A, C). Created before the
+# compute/storage/database resources that consume their outputs.
+# ---------------------------------------------------------------------------
+module "security_kms" {
+  source = "./modules/security_kms"
+
+  environment              = var.environment
+  project_name             = var.app_name
+  region                   = local.region
+  account_id               = local.account_id
+  db_password              = var.db_password
+  key_admin_principal_arns = local.kms_key_admin_principal_arns
+
+  tags = {
+    Application = var.app_name
+  }
+}
+
+module "iam" {
+  source = "./modules/iam"
+
+  environment  = var.environment
+  project_name = var.app_name
+  region       = local.region
+  account_id   = local.account_id
+
+  dynamodb_table_arn     = module.database.table_arn
+  dynamodb_gsi_arns      = [module.database.gsi1_arn, module.database.gsi2_arn]
+  attachments_bucket_arn = module.attachments_bucket.bucket_arn
+  reports_bucket_arn     = module.reports_bucket.bucket_arn
+  queue_arn              = module.events_queue.queue_arn
+
+  escalamiento_function_arn = local.escalamiento_function_arn
+  kms_key_arn               = module.security_kms.kms_key_arn
+  secret_arn                = module.security_kms.secret_arn
+
+  api_tickets_function_name  = local.lambda_names.api_tickets
+  webhook_function_name      = local.lambda_names.webhook_ingesta
+  escalamiento_function_name = local.lambda_names.escalamiento
+  notificacion_function_name = local.lambda_names.notificacion
+  reporte_function_name      = local.lambda_names.reporte_pdf
+
+  github_repo = var.github_repo
+
+  tags = {
+    Application = var.app_name
+  }
+}
 
 # ---------------------------------------------------------------------------
 # Storage — two buckets via the same module with different lifecycle policies.
@@ -11,6 +63,7 @@ module "attachments_bucket" {
   bucket_name   = local.attachments_bucket_name
   environment   = var.environment
   force_destroy = var.bucket_force_destroy
+  kms_key_arn   = module.security_kms.kms_key_arn
 
   lifecycle_rules = [
     {
@@ -34,6 +87,7 @@ module "reports_bucket" {
   bucket_name   = local.reports_bucket_name
   environment   = var.environment
   force_destroy = var.bucket_force_destroy
+  kms_key_arn   = module.security_kms.kms_key_arn
 
   lifecycle_rules = [
     {
@@ -58,6 +112,7 @@ module "database" {
 
   table_name  = local.database_table_name
   environment = var.environment
+  kms_key_arn = module.security_kms.kms_key_arn
 
   tags = {
     Application = var.app_name
@@ -85,34 +140,11 @@ module "events_queue" {
 }
 
 # ---------------------------------------------------------------------------
-# Compute — five Lambdas, each instantiated from the same compute module with
-# per-function memory, timeout and scoped IAM statements (no wildcards).
-# Statements reference module.database.table_arn and bucket ARNs so module
-# outputs are wired into other module inputs (rubric: composition).
+# Compute — five Lambdas, each instantiated from the same compute module.
+# As of Delivery 5 each function's execution role is defined centrally in
+# module.iam (one explicitly scoped, wildcard-free role per service) and wired
+# in via execution_role_arn — no inline IAM statements live here anymore.
 # ---------------------------------------------------------------------------
-
-locals {
-  dynamodb_read_actions = [
-    "dynamodb:GetItem",
-    "dynamodb:BatchGetItem",
-    "dynamodb:Query",
-    "dynamodb:Scan",
-    "dynamodb:ConditionCheckItem",
-  ]
-
-  dynamodb_write_actions = [
-    "dynamodb:PutItem",
-    "dynamodb:UpdateItem",
-    "dynamodb:DeleteItem",
-    "dynamodb:BatchWriteItem",
-  ]
-
-  dynamodb_table_and_indexes = [
-    module.database.table_arn,
-    module.database.gsi1_arn,
-    module.database.gsi2_arn,
-  ]
-}
 
 module "lambda_api_tickets" {
   source = "./modules/compute"
@@ -125,36 +157,14 @@ module "lambda_api_tickets" {
   # Real handler for the Delivery 3 end-to-end proof (GET DynamoDB / POST S3).
   source_dir = "${path.module}/lambda_src/api_tickets"
 
+  execution_role_arn = module.iam.compute_api_role_arn
+
   environment_variables = {
     TABLE_NAME         = module.database.table_name
     ATTACHMENTS_BUCKET = module.attachments_bucket.bucket_name
     # Delivery 4 — producer target queue, wired from the async module output.
     QUEUE_URL = module.events_queue.queue_url
   }
-
-  additional_iam_statements = [
-    {
-      sid       = "DynamoDBTicketsCRUD"
-      actions   = concat(local.dynamodb_read_actions, local.dynamodb_write_actions)
-      resources = local.dynamodb_table_and_indexes
-    },
-    {
-      sid       = "S3AttachmentsReadWrite"
-      actions   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
-      resources = ["${module.attachments_bucket.bucket_arn}/*"]
-    },
-    {
-      sid       = "S3AttachmentsList"
-      actions   = ["s3:ListBucket"]
-      resources = [module.attachments_bucket.bucket_arn]
-    },
-    {
-      # Delivery 4 producer — enqueue only, scoped to the events queue ARN.
-      sid       = "SQSEnqueueEvents"
-      actions   = ["sqs:SendMessage", "sqs:GetQueueAttributes"]
-      resources = [module.events_queue.queue_arn]
-    },
-  ]
 }
 
 module "lambda_webhook_ingesta" {
@@ -165,17 +175,11 @@ module "lambda_webhook_ingesta" {
   memory_size   = 512
   timeout       = var.lambda_timeout_default
 
+  execution_role_arn = module.iam.compute_webhook_role_arn
+
   environment_variables = {
     TABLE_NAME = module.database.table_name
   }
-
-  additional_iam_statements = [
-    {
-      sid       = "DynamoDBIngestWrites"
-      actions   = concat(local.dynamodb_read_actions, local.dynamodb_write_actions)
-      resources = local.dynamodb_table_and_indexes
-    },
-  ]
 }
 
 module "lambda_escalamiento" {
@@ -186,17 +190,11 @@ module "lambda_escalamiento" {
   memory_size   = var.lambda_memory_default
   timeout       = 60
 
+  execution_role_arn = module.iam.compute_escalamiento_role_arn
+
   environment_variables = {
     TABLE_NAME = module.database.table_name
   }
-
-  additional_iam_statements = [
-    {
-      sid       = "DynamoDBEscalationReadWrite"
-      actions   = concat(local.dynamodb_read_actions, local.dynamodb_write_actions)
-      resources = local.dynamodb_table_and_indexes
-    },
-  ]
 }
 
 module "lambda_notificacion" {
@@ -215,27 +213,15 @@ module "lambda_notificacion" {
   # Bound concurrency so a queue flood cannot exhaust downstream throughput.
   reserved_concurrent_executions = var.consumer_reserved_concurrency
 
+  execution_role_arn = module.iam.async_consumer_role_arn
+
   environment_variables = {
     ATTACHMENTS_BUCKET = module.attachments_bucket.bucket_name
-    # Sensitive credential for the reserved data layer, injected via
-    # TF_VAR_db_password (GitHub Environment secret) — never from a .tfvars file.
-    DB_PASSWORD = var.db_password
+    # Delivery 5 — only the secret ARN is injected (never the value). The
+    # handler calls GetSecretValue at startup, retiring the TF_VAR_db_password
+    # plaintext env-var pattern from Delivery 3/4.
+    DB_SECRET_ARN = module.security_kms.secret_arn
   }
-
-  additional_iam_statements = [
-    {
-      # Event source mapping needs these three actions on the specific queue ARN.
-      sid       = "SQSConsumeEvents"
-      actions   = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"]
-      resources = [module.events_queue.queue_arn]
-    },
-    {
-      # Consumer writes one object per message, scoped to the attachments bucket.
-      sid       = "S3WriteEventObjects"
-      actions   = ["s3:PutObject"]
-      resources = ["${module.attachments_bucket.bucket_arn}/*"]
-    },
-  ]
 }
 
 # ---------------------------------------------------------------------------
@@ -266,23 +252,12 @@ module "lambda_reporte_pdf" {
   memory_size   = 1024
   timeout       = 60
 
+  execution_role_arn = module.iam.compute_reporte_role_arn
+
   environment_variables = {
     TABLE_NAME     = module.database.table_name
     REPORTS_BUCKET = module.reports_bucket.bucket_name
   }
-
-  additional_iam_statements = [
-    {
-      sid       = "DynamoDBReportRead"
-      actions   = local.dynamodb_read_actions
-      resources = local.dynamodb_table_and_indexes
-    },
-    {
-      sid       = "S3ReportsWrite"
-      actions   = ["s3:PutObject"]
-      resources = ["${module.reports_bucket.bucket_arn}/*"]
-    },
-  ]
 }
 
 # ---------------------------------------------------------------------------
@@ -357,6 +332,32 @@ module "ingress" {
 }
 
 # ---------------------------------------------------------------------------
+# TLS termination (Delivery 5, Deliverable D) — a regional ACM certificate
+# bound to an API Gateway custom domain (api.<subdomain>) plus a CloudFront
+# distribution (app.<subdomain>) that adds the explicit HTTP->HTTPS 301. The
+# delegated Route53 zone is created in the bootstrap workspace and looked up
+# here. Requires the instructor's NS delegation to be live before apply so the
+# DNS-based certificate validation can complete.
+# ---------------------------------------------------------------------------
+module "tls" {
+  source = "./modules/tls"
+  count  = var.enable_tls ? 1 : 0
+
+  environment = var.environment
+  subdomain   = var.dns_subdomain
+  api_id      = module.ingress.api_id
+
+  # dev (the graded environment) gets clean api/app labels; other environments
+  # get an env suffix so they never collide on the shared delegated zone.
+  api_subdomain_label = var.environment == "dev" ? "api" : "api-${var.environment}"
+  app_subdomain_label = var.environment == "dev" ? "app" : "app-${var.environment}"
+
+  tags = {
+    Application = var.app_name
+  }
+}
+
+# ---------------------------------------------------------------------------
 # Scheduled job (Delivery 4, Deliverable C) — EventBridge Scheduler invokes the
 # escalamiento Lambda on a cadence to sweep open tickets past their SLA. This
 # target is DISTINCT from the async consumer (notificacion). The scheduler's
@@ -371,7 +372,43 @@ module "sla_sweep_scheduler" {
   scheduler_timezone  = var.scheduler_timezone
   target_lambda_arn   = module.lambda_escalamiento.function_arn
   target_lambda_name  = module.lambda_escalamiento.function_name
+  scheduler_role_arn  = module.iam.scheduler_role_arn
   environment         = var.environment
+
+  tags = {
+    Application = var.app_name
+  }
+}
+
+# ---------------------------------------------------------------------------
+# Observability (Delivery 5, Deliverable E) — log groups (one per Lambda),
+# metric alarms wired to an SNS email topic, a CloudWatch dashboard and a
+# monthly cost budget. Every input is wired from root variables/locals.
+# ---------------------------------------------------------------------------
+module "observability" {
+  source = "./modules/observability"
+
+  environment  = var.environment
+  project_name = var.app_name
+  region       = local.region
+
+  lambda_function_names = local.lambda_names
+  log_retention_days    = var.log_retention_days
+
+  api_id     = module.ingress.api_id
+  queue_name = module.events_queue.queue_name
+  dlq_name   = module.events_queue.dlq_name
+
+  notification_email = var.alarm_notification_email
+
+  lambda_error_threshold   = var.lambda_error_threshold
+  apigw_5xx_threshold      = var.apigw_5xx_threshold
+  dlq_depth_threshold      = var.dlq_depth_threshold
+  alarm_period_seconds     = var.alarm_period_seconds
+  alarm_evaluation_periods = var.alarm_evaluation_periods
+
+  monthly_budget_usd                    = var.monthly_budget_usd
+  budget_notification_threshold_percent = var.budget_notification_threshold_percent
 
   tags = {
     Application = var.app_name

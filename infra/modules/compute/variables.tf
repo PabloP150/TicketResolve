@@ -54,22 +54,9 @@ variable "source_dir" {
   default     = null
 }
 
-variable "additional_iam_statements" {
-  description = "Service-specific IAM statements appended to the Lambda's execution role. Each statement must specify explicit actions and resource ARNs — wildcards are not permitted (rubric requirement)."
-  type = list(object({
-    sid       = string
-    actions   = list(string)
-    resources = list(string)
-  }))
-  default = []
-
-  validation {
-    condition = alltrue([
-      for s in var.additional_iam_statements :
-      !contains(s.actions, "*") && !anytrue([for r in s.resources : r == "*"])
-    ])
-    error_message = "Wildcard actions or resources are not permitted in additional_iam_statements (rubric: 'no wildcard Action or Resource')."
-  }
+variable "execution_role_arn" {
+  description = "ARN of the Lambda execution role. As of Delivery 5 the role is defined centrally in infra/modules/iam/ (one explicitly scoped role per service, no wildcards) and injected here — the compute module no longer creates roles."
+  type        = string
 }
 
 variable "reserved_concurrent_executions" {

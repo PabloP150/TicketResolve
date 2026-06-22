@@ -174,3 +174,101 @@ output "security_group_ids" {
     db  = module.security.db_sg_id
   }
 }
+
+# --- Delivery 5: KMS + Secrets (Deliverable B) -------------------------------
+
+output "kms_key_arn" {
+  description = "ARN of the customer-managed CMK encrypting S3, DynamoDB and the secret."
+  value       = module.security_kms.kms_key_arn
+}
+
+output "kms_alias_name" {
+  description = "Alias of the project CMK (alias/<name>)."
+  value       = module.security_kms.kms_alias_name
+}
+
+output "secret_arn" {
+  description = "ARN of the Secrets Manager DB-password secret (the value is never output)."
+  value       = module.security_kms.secret_arn
+}
+
+output "secret_name" {
+  description = "Name of the Secrets Manager DB-password secret."
+  value       = module.security_kms.secret_name
+}
+
+# --- Delivery 5: IAM + OIDC (Deliverables A, C) ------------------------------
+
+output "ci_runner_role_arn" {
+  description = "ARN of the OIDC-assumable CI runner role. Referenced by the GitHub Actions workflows' role-to-assume input."
+  value       = module.iam.ci_runner_role_arn
+}
+
+output "oidc_provider_arn" {
+  description = "ARN of the GitHub Actions OIDC provider provisioned via Terraform."
+  value       = module.iam.oidc_provider_arn
+}
+
+output "lambda_execution_role_arns" {
+  description = "Map of service -> execution role ARN, proving each Lambda consumes a role from the central IAM module (none hardcoded)."
+  value = {
+    compute_api          = module.iam.compute_api_role_arn
+    compute_webhook      = module.iam.compute_webhook_role_arn
+    compute_escalamiento = module.iam.compute_escalamiento_role_arn
+    async_consumer       = module.iam.async_consumer_role_arn
+    compute_reporte      = module.iam.compute_reporte_role_arn
+    scheduler            = module.iam.scheduler_role_arn
+  }
+}
+
+# --- Delivery 5: TLS (Deliverable D) -----------------------------------------
+
+output "tls_certificate_arn" {
+  description = "ARN of the validated ACM certificate covering the API Gateway custom domain and the CloudFront endpoint (null when enable_tls = false)."
+  value       = one(module.tls[*].certificate_arn)
+}
+
+output "api_custom_domain_url" {
+  description = "Public HTTPS URL served by the API Gateway custom domain (regional cert). HTTPS only. null when enable_tls = false."
+  value       = one(module.tls[*].api_url)
+}
+
+output "app_cloudfront_url" {
+  description = "Public HTTPS URL served by CloudFront. Also issues an HTTP 301 redirect to HTTPS on port 80. null when enable_tls = false."
+  value       = one(module.tls[*].app_url)
+}
+
+output "public_endpoints" {
+  description = "Every public-facing URL the application exposes, for the TLS coverage proof in delivery-5-summary.md."
+  value = var.enable_tls ? {
+    api_gateway_custom_domain = one(module.tls[*].api_url)
+    cloudfront                = one(module.tls[*].app_url)
+  } : {}
+}
+
+# --- Delivery 5: Observability (Deliverable E) -------------------------------
+
+output "observability_log_group_arns" {
+  description = "Map of service -> CloudWatch log group ARN. Captured for infra/evidence/observability-outputs.txt."
+  value       = module.observability.log_group_arns
+}
+
+output "observability_alarm_arns" {
+  description = "ARNs of every CloudWatch alarm. Captured for infra/evidence/observability-outputs.txt."
+  value       = module.observability.alarm_arns
+}
+
+output "observability_sns_topic_arn" {
+  description = "ARN of the SNS topic delivering alarm and budget notifications by email."
+  value       = module.observability.sns_topic_arn
+}
+
+output "observability_dashboard_name" {
+  description = "Name of the CloudWatch dashboard."
+  value       = module.observability.dashboard_name
+}
+
+output "observability_budget_name" {
+  description = "Name of the monthly cost budget."
+  value       = module.observability.budget_name
+}

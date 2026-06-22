@@ -35,6 +35,12 @@ variable "lifecycle_rules" {
   }
 }
 
+variable "kms_key_arn" {
+  description = "ARN of the customer-managed KMS key (CMK) used to encrypt objects at rest (Delivery 5). When null the bucket falls back to SSE-S3/AES256; when set the bucket uses aws:kms with this CMK and bucket keys enabled."
+  type        = string
+  default     = null
+}
+
 variable "force_destroy" {
   description = "When true, terraform destroy empties the bucket (deleting all objects and versions) before deleting it, so a non-empty bucket does not block the destroy. Keep false for prod-like buckets where accidental data loss must be impossible; set true for ephemeral dev/staging environments that are torn down and rebuilt."
   type        = bool

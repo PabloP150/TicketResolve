@@ -18,41 +18,9 @@ locals {
   })
 }
 
-data "aws_iam_policy_document" "assume_role" {
-  statement {
-    sid     = "SchedulerAssumeRole"
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["scheduler.amazonaws.com"]
-    }
-  }
-}
-
-resource "aws_iam_role" "scheduler" {
-  name               = "${var.schedule_name}-invoke"
-  description        = "Dedicated EventBridge Scheduler role for ${var.schedule_name}. Allows lambda:InvokeFunction on exactly ${var.target_lambda_name} and nothing else."
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
-  tags               = local.module_tags
-}
-
-# Least privilege: invoke only the one target function. No wildcard ARN.
-data "aws_iam_policy_document" "invoke" {
-  statement {
-    sid       = "InvokeTargetLambda"
-    effect    = "Allow"
-    actions   = ["lambda:InvokeFunction"]
-    resources = [var.target_lambda_arn]
-  }
-}
-
-resource "aws_iam_role_policy" "invoke" {
-  name   = "${var.schedule_name}-invoke-policy"
-  role   = aws_iam_role.scheduler.id
-  policy = data.aws_iam_policy_document.invoke.json
-}
+# NOTE (Delivery 5): the scheduler's invoke role is now defined centrally in
+# infra/modules/iam/ (lambda:InvokeFunction scoped to the escalamiento ARN) and
+# injected via var.scheduler_role_arn. This module no longer creates the role.
 
 resource "aws_scheduler_schedule" "this" {
   name       = var.schedule_name
@@ -68,6 +36,6 @@ resource "aws_scheduler_schedule" "this" {
 
   target {
     arn      = var.target_lambda_arn
-    role_arn = aws_iam_role.scheduler.arn
+    role_arn = var.scheduler_role_arn
   }
 }

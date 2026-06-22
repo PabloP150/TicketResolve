@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write # OIDC federation (Delivery 5, Deliverable C)
 
 defaults:
   run:
@@ -31,11 +32,10 @@ jobs:
         with:
           terraform_version: "~> 1.8"
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ vars.AWS_CI_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Terraform Init (dev backend)
@@ -44,8 +44,6 @@ jobs:
       # -detailed-exitcode: 0 = no changes, 1 = error, 2 = drift present.
       - name: Terraform Plan (detailed exit code)
         id: plan
-        env:
-          TF_VAR_db_password: ${{ secrets.DEV_DB_PASSWORD }}
         run: |
           set +e
           terraform plan -input=false -lock-timeout=120s \

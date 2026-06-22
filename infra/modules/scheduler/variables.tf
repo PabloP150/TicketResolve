@@ -23,6 +23,11 @@ variable "target_lambda_name" {
   type        = string
 }
 
+variable "scheduler_role_arn" {
+  description = "ARN of the EventBridge Scheduler role (defined in infra/modules/iam/) that grants lambda:InvokeFunction on the target Lambda. Injected here; this module no longer creates the role."
+  type        = string
+}
+
 variable "flexible_time_window_minutes" {
   description = "Width, in minutes, of the flexible time window in which EventBridge Scheduler may invoke the target. 0 disables flexibility (invoke exactly at the schedule time)."
   type        = number

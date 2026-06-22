@@ -1,11 +1,8 @@
-data "aws_caller_identity" "current" {}
-data "aws_region" "current" {}
-
 locals {
-  account_id     = data.aws_caller_identity.current.account_id
-  region         = data.aws_region.current.name
+  # The CloudWatch log group for this function is provisioned centrally in
+  # infra/modules/observability/ (Delivery 5) with a configurable retention —
+  # the compute module no longer creates it. Name kept here for the output.
   log_group_name = "/aws/lambda/${var.function_name}"
-  log_group_arn  = "arn:aws:logs:${local.region}:${local.account_id}:log-group:${local.log_group_name}"
 
   module_tags = merge(var.tags, {
     Environment  = var.environment
@@ -53,68 +50,14 @@ locals {
   archive_hash = var.source_dir == null ? data.archive_file.placeholder[0].output_base64sha256 : data.archive_file.from_source[0].output_base64sha256
 }
 
-resource "aws_cloudwatch_log_group" "this" {
-  name              = local.log_group_name
-  retention_in_days = var.log_retention_in_days
-  tags              = local.module_tags
-}
-
-data "aws_iam_policy_document" "assume_role" {
-  statement {
-    sid     = "LambdaAssumeRole"
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-  }
-}
-
-resource "aws_iam_role" "execution" {
-  name               = "${var.function_name}-exec"
-  description        = "Execution role for the ${var.function_name} Lambda. Scoped to its own CloudWatch log group plus the service-specific statements wired from the root module."
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
-  tags               = local.module_tags
-}
-
-data "aws_iam_policy_document" "execution" {
-  # Minimum permissions needed for the function to write its own logs.
-  # Resource is scoped to this Lambda's log group ARN — no wildcards on Resource or Action.
-  statement {
-    sid    = "WriteOwnLogs"
-    effect = "Allow"
-    actions = [
-      "logs:CreateLogStream",
-      "logs:PutLogEvents",
-    ]
-    resources = [
-      "${local.log_group_arn}:*",
-    ]
-  }
-
-  # Service-specific statements appended by the caller (e.g. DynamoDB GetItem, S3 PutObject).
-  dynamic "statement" {
-    for_each = var.additional_iam_statements
-    content {
-      sid       = statement.value.sid
-      effect    = "Allow"
-      actions   = statement.value.actions
-      resources = statement.value.resources
-    }
-  }
-}
-
-resource "aws_iam_role_policy" "execution" {
-  name   = "${var.function_name}-exec-policy"
-  role   = aws_iam_role.execution.id
-  policy = data.aws_iam_policy_document.execution.json
-}
+# NOTE (Delivery 5): this module no longer creates its own execution role.
+# Roles are now defined centrally in infra/modules/iam/ (one explicitly scoped
+# role per service, no wildcards) and the ARN is injected via
+# var.execution_role_arn. The per-function CloudWatch log group stays here.
 
 resource "aws_lambda_function" "this" {
   function_name = var.function_name
-  role          = aws_iam_role.execution.arn
+  role          = var.execution_role_arn
   runtime       = var.runtime
   handler       = var.handler
   memory_size   = var.memory_size
@@ -133,9 +76,4 @@ resource "aws_lambda_function" "this" {
   }
 
   tags = local.module_tags
-
-  depends_on = [
-    aws_cloudwatch_log_group.this,
-    aws_iam_role_policy.execution,
-  ]
 }

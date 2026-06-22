@@ -1,0 +1,47 @@
+# Delivery 5 — Deliverable E (Observability) — terraform output
+# ============================================================================
+## Log group ARNs (one per Lambda):
+{
+    "api_tickets": "arn:aws:logs:us-east-1:010526283195:log-group:/aws/lambda/ticketresolve-api-tickets-dev",
+    "escalamiento": "arn:aws:logs:us-east-1:010526283195:log-group:/aws/lambda/ticketresolve-escalamiento-dev",
+    "notificacion": "arn:aws:logs:us-east-1:010526283195:log-group:/aws/lambda/ticketresolve-notificacion-dev",
+    "reporte_pdf": "arn:aws:logs:us-east-1:010526283195:log-group:/aws/lambda/ticketresolve-reporte-pdf-dev",
+    "webhook_ingesta": "arn:aws:logs:us-east-1:010526283195:log-group:/aws/lambda/ticketresolve-webhook-ingesta-dev"
+}
+
+## Alarm ARNs (per-Lambda Errors x5, API Gateway 5xx, DLQ depth):
+[
+    "arn:aws:cloudwatch:us-east-1:010526283195:alarm:ticketresolve-api-tickets-dev-errors",
+    "arn:aws:cloudwatch:us-east-1:010526283195:alarm:ticketresolve-escalamiento-dev-errors",
+    "arn:aws:cloudwatch:us-east-1:010526283195:alarm:ticketresolve-notificacion-dev-errors",
+    "arn:aws:cloudwatch:us-east-1:010526283195:alarm:ticketresolve-reporte-pdf-dev-errors",
+    "arn:aws:cloudwatch:us-east-1:010526283195:alarm:ticketresolve-webhook-ingesta-dev-errors",
+    "arn:aws:cloudwatch:us-east-1:010526283195:alarm:ticketresolve-dev-apigw-5xx",
+    "arn:aws:cloudwatch:us-east-1:010526283195:alarm:ticketresolve-dev-dlq-depth"
+]
+
+## SNS topic / dashboard / budget:
+sns_topic_arn = arn:aws:sns:us-east-1:010526283195:ticketresolve-dev-alarms
+dashboard     = ticketresolve-dev-overview
+budget        = ticketresolve-dev-monthly
+
+## aws cloudwatch describe-alarms (count):
+7
+## aws budgets describe-budget:
+{
+    "Name": "ticketresolve-dev-monthly",
+    "Limit": {
+        "Amount": "5.0",
+        "Unit": "USD"
+    },
+    "Notifications": {
+        "ActualSpend": {
+            "Amount": "0.097",
+            "Unit": "USD"
+        },
+        "ForecastedSpend": {
+            "Amount": "0.115",
+            "Unit": "USD"
+        }
+    }
+}
