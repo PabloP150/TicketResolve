@@ -1,5 +1,7 @@
+api_custom_domain_url = "https://api.grupo7.oyd.solid.com.gt"
 api_gateway_endpoint = "https://e60690a9q6.execute-api.us-east-1.amazonaws.com"
 api_gateway_id = "e60690a9q6"
+app_cloudfront_url = "https://app.grupo7.oyd.solid.com.gt"
 attachments_bucket_arn = "arn:aws:s3:::ticketresolve-attachments-dev-010526283195"
 attachments_bucket_name = "ticketresolve-attachments-dev-010526283195"
 ci_runner_role_arn = "arn:aws:iam::010526283195:role/ticketresolve-dev-ci-runner"
@@ -73,7 +75,10 @@ private_subnet_ids = [
   "subnet-0aac5bb871fe14f76",
   "subnet-02e62b18788a214af",
 ]
-public_endpoints = tomap({})
+public_endpoints = tomap({
+  "api_gateway_custom_domain" = "https://api.grupo7.oyd.solid.com.gt"
+  "cloudfront" = "https://app.grupo7.oyd.solid.com.gt"
+})
 public_subnet_ids = [
   "subnet-0b125e905d68ed851",
   "subnet-0b2e3800bcffe5c2c",
@@ -89,5 +94,6 @@ security_group_ids = {
 }
 sla_sweep_schedule_arn = "arn:aws:scheduler:us-east-1:010526283195:schedule/default/ticketresolve-dev-sla-sweep"
 sla_sweep_schedule_name = "ticketresolve-dev-sla-sweep"
+tls_certificate_arn = "arn:aws:acm:us-east-1:010526283195:certificate/ba32e1dd-aa12-49a1-b9a1-f4798d6ae3f2"
 vpc_id = "vpc-0e8b3c272daa5ea0b"
 workspace_region = "us-east-1"

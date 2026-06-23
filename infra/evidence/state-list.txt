@@ -141,3 +141,16 @@ module.security_kms.aws_kms_key.cmk
 module.security_kms.aws_secretsmanager_secret.db_password
 module.security_kms.aws_secretsmanager_secret_version.db_password
 module.sla_sweep_scheduler.aws_scheduler_schedule.this
+module.tls[0].data.aws_cloudfront_cache_policy.disabled
+module.tls[0].data.aws_cloudfront_origin_request_policy.all_viewer_except_host
+module.tls[0].data.aws_region.current
+module.tls[0].data.aws_route53_zone.this
+module.tls[0].aws_acm_certificate.this
+module.tls[0].aws_acm_certificate_validation.this
+module.tls[0].aws_apigatewayv2_api_mapping.api
+module.tls[0].aws_apigatewayv2_domain_name.api
+module.tls[0].aws_cloudfront_distribution.this
+module.tls[0].aws_route53_record.api
+module.tls[0].aws_route53_record.app
+module.tls[0].aws_route53_record.validation["*.grupo7.oyd.solid.com.gt"]
+module.tls[0].aws_route53_record.validation["grupo7.oyd.solid.com.gt"]
