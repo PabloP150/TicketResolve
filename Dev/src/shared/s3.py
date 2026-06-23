@@ -10,6 +10,7 @@ import re
 from typing import Any
 
 import boto3
+from botocore.client import Config
 
 from shared.models import MAX_FILENAME_LEN, ValidationError
 
@@ -37,10 +38,19 @@ _SAFE_FILENAME_RE = re.compile(r"[^\w.\-]")
 
 
 def get_s3_client() -> Any:
-    """Return (lazily initialised) boto3 S3 client."""
+    """Return (lazily initialised) boto3 S3 client.
+
+    Pinned to Signature Version 4 (s3v4). The attachments and reports buckets are
+    encrypted with an SSE-KMS CMK, and S3 REJECTS presigned URLs signed with the
+    legacy SigV2 scheme for KMS-encrypted objects ("Requests specifying Server
+    Side Encryption with AWS KMS managed keys require AWS Signature Version 4").
+    boto3's default can still emit SigV2-style presigned URLs (AWSAccessKeyId +
+    Signature query params), which made browser uploads fail with InvalidArgument
+    and left the object missing (later download -> NoSuchKey). s3v4 fixes it.
+    """
     global _s3_client
     if _s3_client is None:
-        _s3_client = boto3.client("s3")
+        _s3_client = boto3.client("s3", config=Config(signature_version="s3v4"))
     return _s3_client
 
 
