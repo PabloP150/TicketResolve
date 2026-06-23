@@ -24,6 +24,24 @@ variable "region" {
   default     = "us-east-1"
 }
 
+variable "github_repo" {
+  description = "GitHub repository in <org>/<repo> form. Used to scope the GitHub Actions OIDC trust policy on the CI runner role to this repository's subject claims (Delivery 5, Deliverable C)."
+  type        = string
+  default     = "PabloP150/TicketResolve"
+}
+
+variable "dns_subdomain" {
+  description = "Delegated DNS subdomain the team controls for TLS (Delivery 5, Deliverable D). The public Route53 hosted zone for it is created in the bootstrap workspace; this workspace looks it up to issue the ACM certificate and create the custom-domain alias records."
+  type        = string
+  default     = "grupo7.oyd.solid.com.gt"
+}
+
+variable "enable_tls" {
+  description = "Whether to provision the TLS layer (ACM cert, API Gateway custom domain, CloudFront). Defaults to true (the committed config for the one-click proof). Set to false for an interim apply BEFORE the instructor's NS delegation is live, since ACM DNS validation would otherwise hang. Flip back to true once `dig NS grupo7.oyd.solid.com.gt` returns our name servers."
+  type        = bool
+  default     = true
+}
+
 variable "architecture" {
   description = "Default CPU architecture for future compute workloads (Lambda, ECS tasks, EC2). Exposed as a tag on every resource so future compute modules can read it consistently."
   type        = string
@@ -206,8 +224,63 @@ variable "scheduler_timezone" {
 # --- Sensitive runtime credential (Delivery 4) ------------------------------
 
 variable "db_password" {
-  description = "Sensitive runtime credential for the reserved data layer (future RDS cutover). Injected from a GitHub Environment secret as TF_VAR_db_password — never committed to a .tfvars file. Passed to the consumer Lambda as an environment variable."
+  description = "Sensitive seed value for the Secrets Manager DB-password secret (Delivery 5). Only used to create the initial secret version; the authoritative value is then managed inside Secrets Manager (ignore_changes), so this no longer needs a TF_VAR_db_password GitHub secret. Never committed to a .tfvars file."
   type        = string
-  default     = "" # overridden per-environment via TF_VAR_db_password (env secret)
+  default     = "CHANGEME-set-real-value-in-secrets-manager"
   sensitive   = true
+}
+
+# --- Observability (Delivery 5, Deliverable E) ------------------------------
+
+variable "log_retention_days" {
+  description = "Retention, in days, for every Lambda CloudWatch log group. Set per environment in <env>.tfvars."
+  type        = number
+  default     = 14
+}
+
+variable "alarm_notification_email" {
+  description = "Email subscribed to the SNS alarm/budget topic. AWS sends a one-time confirmation email that must be accepted before notifications are delivered."
+  type        = string
+}
+
+variable "lambda_error_threshold" {
+  description = "Lambda Errors count within an evaluation period that trips the per-function error alarm."
+  type        = number
+  default     = 1
+}
+
+variable "apigw_5xx_threshold" {
+  description = "API Gateway 5xx count within an evaluation period that trips the ingress error alarm."
+  type        = number
+  default     = 1
+}
+
+variable "dlq_depth_threshold" {
+  description = "Visible DLQ message count that trips the dead-letter-queue alarm."
+  type        = number
+  default     = 1
+}
+
+variable "alarm_period_seconds" {
+  description = "Length, in seconds, of each alarm metric aggregation period."
+  type        = number
+  default     = 300
+}
+
+variable "alarm_evaluation_periods" {
+  description = "Number of consecutive breaching periods before an alarm fires."
+  type        = number
+  default     = 1
+}
+
+variable "monthly_budget_usd" {
+  description = "Monthly cost budget in USD. The project targets near-$0, so a small budget surfaces unexpected spend immediately."
+  type        = number
+  default     = 5
+}
+
+variable "budget_notification_threshold_percent" {
+  description = "Percentage of the monthly budget that triggers an SNS notification."
+  type        = number
+  default     = 80
 }

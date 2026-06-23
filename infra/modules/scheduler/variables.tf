@@ -23,6 +23,11 @@ variable "target_lambda_name" {
   type        = string
 }
 
+variable "scheduler_role_arn" {
+  description = "ARN of the EventBridge Scheduler role (defined in infra/modules/iam/) that grants lambda:InvokeFunction on the target Lambda. Injected here; this module no longer creates the role."
+  type        = string
+}
+
 variable "flexible_time_window_minutes" {
   description = "Width, in minutes, of the flexible time window in which EventBridge Scheduler may invoke the target. 0 disables flexibility (invoke exactly at the schedule time)."
   type        = number
@@ -34,13 +39,7 @@ variable "flexible_time_window_minutes" {
   }
 }
 
-variable "environment" {
-  description = "Deployment environment (dev/staging/prod). Surfaced in tags."
-  type        = string
-}
-
-variable "tags" {
-  description = "Additional tags merged onto the IAM role created by this module (the schedule resource itself does not take free-form tags)."
-  type        = map(string)
-  default     = {}
-}
+# Note (Delivery 5): the old `environment` and `tags` inputs were removed — the
+# IAM role they tagged now lives in infra/modules/iam/, and aws_scheduler_schedule
+# does not accept free-form tags. The module's only remaining inputs are the
+# schedule definition plus the injected scheduler_role_arn.

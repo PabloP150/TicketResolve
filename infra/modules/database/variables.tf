@@ -25,6 +25,12 @@ variable "ttl_attribute_name" {
   default     = "ttl"
 }
 
+variable "kms_key_arn" {
+  description = "ARN of the customer-managed KMS key (CMK) used for DynamoDB encryption at rest (Delivery 5). When null the table uses the AWS-owned key; when set it uses this CMK."
+  type        = string
+  default     = null
+}
+
 variable "tags" {
   description = "Additional tags to merge on the table. The module adds Environment, ManagedBy and Module tags automatically."
   type        = map(string)

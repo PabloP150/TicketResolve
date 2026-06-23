@@ -1,0 +1,38 @@
+# Delivery 5 — Deliverable C (OIDC) — provider provisioned via Terraform
+# ============================================================================
+ci_runner_role_arn = arn:aws:iam::010526283195:role/ticketresolve-dev-ci-runner
+oidc_provider_arn  = arn:aws:iam::010526283195:oidc-provider/token.actions.githubusercontent.com
+
+## aws iam list-open-id-connect-providers:
+{
+    "OpenIDConnectProviderList": [
+        {
+            "Arn": "arn:aws:iam::010526283195:oidc-provider/token.actions.githubusercontent.com"
+        }
+    ]
+}
+
+## CI runner role trust policy (scoped to repo subjects, no wildcard):
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "GitHubOIDCAssume",
+            "Effect": "Allow",
+            "Principal": {
+                "Federated": "arn:aws:iam::010526283195:oidc-provider/token.actions.githubusercontent.com"
+            },
+            "Action": "sts:AssumeRoleWithWebIdentity",
+            "Condition": {
+                "StringEquals": {
+                    "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+                    "token.actions.githubusercontent.com:sub": [
+                        "repo:PabloP150/TicketResolve:ref:refs/heads/main",
+                        "repo:PabloP150/TicketResolve:environment:dev",
+                        "repo:PabloP150/TicketResolve:environment:staging"
+                    ]
+                }
+            }
+        }
+    ]
+}

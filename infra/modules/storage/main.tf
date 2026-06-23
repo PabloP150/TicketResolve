@@ -21,13 +21,18 @@ resource "aws_s3_bucket_versioning" "this" {
   }
 }
 
+# Server-side encryption. Delivery 5 upgrades from SSE-S3 (AES256) to a
+# customer-managed key (aws:kms) when var.kms_key_arn is supplied. Bucket keys
+# are enabled to cut KMS request cost on high-volume object access.
 resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
   bucket = aws_s3_bucket.this.id
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm     = var.kms_key_arn == null ? "AES256" : "aws:kms"
+      kms_master_key_id = var.kms_key_arn
     }
+    bucket_key_enabled = var.kms_key_arn != null
   }
 }
 

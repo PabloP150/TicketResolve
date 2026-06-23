@@ -14,16 +14,11 @@ output "invoke_arn" {
 }
 
 output "role_arn" {
-  description = "ARN of the Lambda execution role. Useful for attaching additional managed policies from the root if ever required."
-  value       = aws_iam_role.execution.arn
-}
-
-output "role_name" {
-  description = "Name of the Lambda execution role."
-  value       = aws_iam_role.execution.name
+  description = "ARN of the Lambda execution role (defined in infra/modules/iam/ and injected via execution_role_arn). Echoed back for convenience."
+  value       = var.execution_role_arn
 }
 
 output "log_group_name" {
-  description = "Name of the Lambda's CloudWatch log group. Useful for CloudWatch Insights queries and alarm targets in Delivery 5."
-  value       = aws_cloudwatch_log_group.this.name
+  description = "Name of the Lambda's CloudWatch log group (provisioned in infra/modules/observability/). Useful for CloudWatch Insights queries and alarm targets."
+  value       = local.log_group_name
 }

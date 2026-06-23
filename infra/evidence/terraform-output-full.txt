@@ -1,0 +1,99 @@
+api_custom_domain_url = "https://api.grupo7.oyd.solid.com.gt"
+api_gateway_endpoint = "https://e60690a9q6.execute-api.us-east-1.amazonaws.com"
+api_gateway_id = "e60690a9q6"
+app_cloudfront_url = "https://app.grupo7.oyd.solid.com.gt"
+attachments_bucket_arn = "arn:aws:s3:::ticketresolve-attachments-dev-010526283195"
+attachments_bucket_name = "ticketresolve-attachments-dev-010526283195"
+ci_runner_role_arn = "arn:aws:iam::010526283195:role/ticketresolve-dev-ci-runner"
+database_stream_arn = "arn:aws:dynamodb:us-east-1:010526283195:table/ticketresolve-dev/stream/2026-06-22T22:59:28.625"
+database_table_arn = "arn:aws:dynamodb:us-east-1:010526283195:table/ticketresolve-dev"
+database_table_name = "ticketresolve-dev"
+enqueue_url = "https://e60690a9q6.execute-api.us-east-1.amazonaws.com/api/v1/incidents/enqueue"
+event_source_mapping_uuid = "3d59bf69-c385-429f-8ccd-13a5884c73a5"
+events_dlq_arn = "arn:aws:sqs:us-east-1:010526283195:ticketresolve-dev-events-dlq"
+events_dlq_url = "https://sqs.us-east-1.amazonaws.com/010526283195/ticketresolve-dev-events-dlq"
+events_queue_arn = "arn:aws:sqs:us-east-1:010526283195:ticketresolve-dev-events"
+events_queue_url = "https://sqs.us-east-1.amazonaws.com/010526283195/ticketresolve-dev-events"
+health_check_url = "https://e60690a9q6.execute-api.us-east-1.amazonaws.com/"
+ingress_url = "https://e60690a9q6.execute-api.us-east-1.amazonaws.com/api/v1/incidents"
+kms_alias_name = "alias/ticketresolve-dev"
+kms_key_arn = "arn:aws:kms:us-east-1:010526283195:key/8da89dc4-6ad3-445f-8382-fc04637cdd35"
+lambda_execution_role_arns = {
+  "async_consumer" = "arn:aws:iam::010526283195:role/ticketresolve-dev-async-consumer"
+  "compute_api" = "arn:aws:iam::010526283195:role/ticketresolve-dev-compute-api"
+  "compute_escalamiento" = "arn:aws:iam::010526283195:role/ticketresolve-dev-compute-escalamiento"
+  "compute_reporte" = "arn:aws:iam::010526283195:role/ticketresolve-dev-compute-reporte"
+  "compute_webhook" = "arn:aws:iam::010526283195:role/ticketresolve-dev-compute-webhook"
+  "scheduler" = "arn:aws:iam::010526283195:role/ticketresolve-dev-scheduler-invoke"
+}
+lambda_function_arns = {
+  "api_tickets" = "arn:aws:lambda:us-east-1:010526283195:function:ticketresolve-api-tickets-dev"
+  "escalamiento" = "arn:aws:lambda:us-east-1:010526283195:function:ticketresolve-escalamiento-dev"
+  "notificacion" = "arn:aws:lambda:us-east-1:010526283195:function:ticketresolve-notificacion-dev"
+  "reporte_pdf" = "arn:aws:lambda:us-east-1:010526283195:function:ticketresolve-reporte-pdf-dev"
+  "webhook_ingesta" = "arn:aws:lambda:us-east-1:010526283195:function:ticketresolve-webhook-ingesta-dev"
+}
+lambda_function_names = {
+  "api_tickets" = "ticketresolve-api-tickets-dev"
+  "escalamiento" = "ticketresolve-escalamiento-dev"
+  "notificacion" = "ticketresolve-notificacion-dev"
+  "reporte_pdf" = "ticketresolve-reporte-pdf-dev"
+  "webhook_ingesta" = "ticketresolve-webhook-ingesta-dev"
+}
+nat_gateway_ids = []
+observability_alarm_arns = [
+  "arn:aws:cloudwatch:us-east-1:010526283195:alarm:ticketresolve-api-tickets-dev-errors",
+  "arn:aws:cloudwatch:us-east-1:010526283195:alarm:ticketresolve-escalamiento-dev-errors",
+  "arn:aws:cloudwatch:us-east-1:010526283195:alarm:ticketresolve-notificacion-dev-errors",
+  "arn:aws:cloudwatch:us-east-1:010526283195:alarm:ticketresolve-reporte-pdf-dev-errors",
+  "arn:aws:cloudwatch:us-east-1:010526283195:alarm:ticketresolve-webhook-ingesta-dev-errors",
+  "arn:aws:cloudwatch:us-east-1:010526283195:alarm:ticketresolve-dev-apigw-5xx",
+  "arn:aws:cloudwatch:us-east-1:010526283195:alarm:ticketresolve-dev-dlq-depth",
+]
+observability_budget_name = "ticketresolve-dev-monthly"
+observability_dashboard_name = "ticketresolve-dev-overview"
+observability_log_group_arns = {
+  "api_tickets" = "arn:aws:logs:us-east-1:010526283195:log-group:/aws/lambda/ticketresolve-api-tickets-dev"
+  "escalamiento" = "arn:aws:logs:us-east-1:010526283195:log-group:/aws/lambda/ticketresolve-escalamiento-dev"
+  "notificacion" = "arn:aws:logs:us-east-1:010526283195:log-group:/aws/lambda/ticketresolve-notificacion-dev"
+  "reporte_pdf" = "arn:aws:logs:us-east-1:010526283195:log-group:/aws/lambda/ticketresolve-reporte-pdf-dev"
+  "webhook_ingesta" = "arn:aws:logs:us-east-1:010526283195:log-group:/aws/lambda/ticketresolve-webhook-ingesta-dev"
+}
+observability_sns_topic_arn = "arn:aws:sns:us-east-1:010526283195:ticketresolve-dev-alarms"
+oidc_provider_arn = "arn:aws:iam::010526283195:oidc-provider/token.actions.githubusercontent.com"
+private_app_subnet_ids = [
+  "subnet-04b7227edc9d41f76",
+  "subnet-000f1c253c542794c",
+]
+private_data_subnet_ids = [
+  "subnet-0aac5bb871fe14f76",
+  "subnet-02e62b18788a214af",
+]
+private_subnet_ids = [
+  "subnet-04b7227edc9d41f76",
+  "subnet-000f1c253c542794c",
+  "subnet-0aac5bb871fe14f76",
+  "subnet-02e62b18788a214af",
+]
+public_endpoints = tomap({
+  "api_gateway_custom_domain" = "https://api.grupo7.oyd.solid.com.gt"
+  "cloudfront" = "https://app.grupo7.oyd.solid.com.gt"
+})
+public_subnet_ids = [
+  "subnet-0b125e905d68ed851",
+  "subnet-0b2e3800bcffe5c2c",
+]
+reports_bucket_arn = "arn:aws:s3:::ticketresolve-reports-dev-010526283195"
+reports_bucket_name = "ticketresolve-reports-dev-010526283195"
+secret_arn = "arn:aws:secretsmanager:us-east-1:010526283195:secret:ticketresolve-dev-db-password-dHnYk0"
+secret_name = "ticketresolve-dev-db-password"
+security_group_ids = {
+  "app" = "sg-0876a4f1f8669c5aa"
+  "db" = "sg-0f459b6967c0567bd"
+  "web" = "sg-0794af3845e536b7b"
+}
+sla_sweep_schedule_arn = "arn:aws:scheduler:us-east-1:010526283195:schedule/default/ticketresolve-dev-sla-sweep"
+sla_sweep_schedule_name = "ticketresolve-dev-sla-sweep"
+tls_certificate_arn = "arn:aws:acm:us-east-1:010526283195:certificate/ba32e1dd-aa12-49a1-b9a1-f4798d6ae3f2"
+vpc_id = "vpc-0e8b3c272daa5ea0b"
+workspace_region = "us-east-1"

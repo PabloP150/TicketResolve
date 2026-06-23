@@ -9,6 +9,6 @@ output "schedule_name" {
 }
 
 output "scheduler_role_arn" {
-  description = "ARN of the dedicated IAM role the scheduler assumes to invoke the target Lambda. Scoped to lambda:InvokeFunction on the single target ARN."
-  value       = aws_iam_role.scheduler.arn
+  description = "ARN of the IAM role the scheduler assumes to invoke the target Lambda (defined in infra/modules/iam/, injected via var.scheduler_role_arn)."
+  value       = var.scheduler_role_arn
 }

@@ -4,55 +4,12 @@
 # escalamiento Lambda that scans for open tickets past their SLA. This target
 # is DISTINCT from the async consumer (notificacion) per the Delivery 4 spec.
 #
-# The schedule has its own IAM role whose only permission is lambda:InvokeFunction
-# on the single target function ARN. That is narrower than the target Lambda's
-# own execution role (which can read/write DynamoDB): the scheduler may only
-# *invoke*, never touch data.
+# The schedule's IAM role (lambda:InvokeFunction scoped to the single target
+# function ARN — narrower than the target Lambda's own execution role) is now
+# defined centrally in infra/modules/iam/ and injected via var.scheduler_role_arn
+# (Delivery 5). This module only creates the schedule itself; aws_scheduler_schedule
+# does not take free-form tags, so this module declares none.
 # ===========================================================================
-
-locals {
-  module_tags = merge(var.tags, {
-    Environment = var.environment
-    ManagedBy   = "Terraform"
-    Module      = "scheduler"
-  })
-}
-
-data "aws_iam_policy_document" "assume_role" {
-  statement {
-    sid     = "SchedulerAssumeRole"
-    effect  = "Allow"
-    actions = ["sts:AssumeRole"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["scheduler.amazonaws.com"]
-    }
-  }
-}
-
-resource "aws_iam_role" "scheduler" {
-  name               = "${var.schedule_name}-invoke"
-  description        = "Dedicated EventBridge Scheduler role for ${var.schedule_name}. Allows lambda:InvokeFunction on exactly ${var.target_lambda_name} and nothing else."
-  assume_role_policy = data.aws_iam_policy_document.assume_role.json
-  tags               = local.module_tags
-}
-
-# Least privilege: invoke only the one target function. No wildcard ARN.
-data "aws_iam_policy_document" "invoke" {
-  statement {
-    sid       = "InvokeTargetLambda"
-    effect    = "Allow"
-    actions   = ["lambda:InvokeFunction"]
-    resources = [var.target_lambda_arn]
-  }
-}
-
-resource "aws_iam_role_policy" "invoke" {
-  name   = "${var.schedule_name}-invoke-policy"
-  role   = aws_iam_role.scheduler.id
-  policy = data.aws_iam_policy_document.invoke.json
-}
 
 resource "aws_scheduler_schedule" "this" {
   name       = var.schedule_name
@@ -68,6 +25,6 @@ resource "aws_scheduler_schedule" "this" {
 
   target {
     arn      = var.target_lambda_arn
-    role_arn = aws_iam_role.scheduler.arn
+    role_arn = var.scheduler_role_arn
   }
 }

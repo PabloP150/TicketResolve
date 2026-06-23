@@ -22,3 +22,8 @@ output "dlq_arn" {
   description = "ARN of the dead-letter queue. Referenced by the main queue's redrive_policy and available for DLQ alarm targets in Delivery 5."
   value       = aws_sqs_queue.dlq.arn
 }
+
+output "dlq_name" {
+  description = "Name of the dead-letter queue. Used as the QueueName dimension for the DLQ-depth alarm and dashboard widget."
+  value       = aws_sqs_queue.dlq.name
+}

@@ -374,3 +374,189 @@ Screenshots _(pendientes de captura)_:
 
 ![async consumer log](evidence/async-consumer.png)
 ![async object in S3](evidence/async-object.png)
+
+---
+
+## Evidence — Delivery 5 (Security, Observability & One-Click Deployment)
+
+Written summary: [`docs/delivery-5-summary.md`](docs/delivery-5-summary.md) ·
+IaC coverage: [`docs/iac-coverage.md`](docs/iac-coverage.md)
+
+### Deliverable A — IAM Security Module
+
+`infra/modules/iam/` defines one explicitly scoped role per service (compute-api,
+compute-webhook, compute-escalamiento, async-consumer, compute-reporte,
+scheduler) plus the OIDC-assumable CI runner role. **No service role uses a
+wildcard Action or Resource.** Every role/policy ARN is a module output and is
+consumed by the module calls in `main.tf` (none hardcoded).
+
+Evidence: [`evidence/iam-plan.txt`](evidence/iam-plan.txt) — `terraform plan`
+excerpt showing the IAM roles, policies and attachments to be created.
+
+```text
+(see evidence/iam-plan.txt — populated by the apply run)
+```
+
+### Deliverable B — Secrets Manager & KMS
+
+One customer-managed CMK (`alias/ticketresolve-dev`) encrypts both S3 buckets
+(`aws:kms`), the DynamoDB table and the Secrets Manager secret. The key policy is
+least-privilege (admin scoped by `aws:PrincipalArn`; usage scoped by
+`kms:ViaService` + `kms:CallerAccount`). The notificacion handler reads the
+password at runtime via `GetSecretValue` using the injected `DB_SECRET_ARN`;
+`TF_VAR_db_password` was retired.
+
+Evidence: [`evidence/secrets-kms.txt`](evidence/secrets-kms.txt) (`terraform
+output`) · `evidence/secrets-console.png` (Secrets Manager console).
+
+![secret in Secrets Manager console](evidence/secrets-console.png)
+
+### Deliverable C — OIDC CI Authentication
+
+GitHub Actions OIDC provider provisioned in Terraform; the CI runner trust policy
+is scoped to `repo:PabloP150/TicketResolve` subjects (`ref:refs/heads/main` +
+`environment:dev`/`staging`, no wildcard). All workflows use
+`role-to-assume: ${{ vars.AWS_CI_ROLE_ARN }}` with `id-token: write`; no
+long-lived AWS keys remain.
+
+Evidence: `evidence/oidc-secrets-removed.png` (repo secrets after removal) ·
+`evidence/oidc-auth-log.png` (workflow run showing the OIDC token exchange).
+
+![OIDC secrets removed](evidence/oidc-secrets-removed.png)
+![OIDC token exchange in the run log](evidence/oidc-auth-log.png)
+
+### Deliverable D — TLS Termination (all endpoints)
+
+Regional ACM certificate bound to the API Gateway custom domain
+(`api.grupo7.oyd.solid.com.gt`, HTTPS-only) plus a CloudFront distribution
+(`app.grupo7.oyd.solid.com.gt`) providing the explicit HTTP→HTTPS 301. Both
+endpoints are covered by the same wildcard certificate. Certificate, custom
+domain, CloudFront and DNS records are all Terraform; the delegated zone lives in
+the bootstrap workspace.
+
+Evidence: [`evidence/tls-curl.txt`](evidence/tls-curl.txt) — `curl -v https://`
+(200 + cert subject) and `curl -v http://` (301) for each public URL.
+
+```text
+(see evidence/tls-curl.txt — populated by the apply run)
+```
+
+### Deliverable E — Observability Module
+
+`infra/modules/observability/`: one log group per Lambda
+(`log_retention_days` variable), ≥2 metric alarms (per-Lambda Errors, API
+Gateway 5xx, DLQ depth) wired to an SNS email topic, a dashboard with three
+widgets generated via `jsonencode()`, and a monthly cost budget with an 80%
+notification threshold. All inputs wired from root variables.
+
+Evidence: [`evidence/observability-outputs.txt`](evidence/observability-outputs.txt)
+(log group + alarm ARNs) · `evidence/dashboard.png` · `evidence/budget.png`.
+
+![CloudWatch dashboard](evidence/dashboard.png)
+![AWS Budget](evidence/budget.png)
+
+### Deliverable F — One-Click Deployment Proof
+
+A `terraform destroy` on the main workspace followed by a single `git push` to
+`main` brings the entire seven-component architecture up via the CD pipeline
+(init → plan → apply), with no manual console actions. A second push with no
+changes yields `terraform plan -detailed-exitcode` exit code 0.
+
+Evidence: `evidence/clean-state-pipeline.png` (all jobs green) ·
+[`evidence/terraform-output-full.txt`](evidence/terraform-output-full.txt) ·
+[`evidence/idempotent-plan.txt`](evidence/idempotent-plan.txt).
+
+![clean-state pipeline run](evidence/clean-state-pipeline.png)
+
+### Deliverable I — Full IaC Coverage Proof
+
+[`docs/iac-coverage.md`](docs/iac-coverage.md) maps every component to its
+Terraform resource across all seven categories and confirms no manual resources.
+
+Evidence: [`evidence/state-list.txt`](evidence/state-list.txt) (`terraform state
+list`) · `evidence/deployed-components.png` (running Lambdas in the console).
+
+![deployed components](evidence/deployed-components.png)
+
+### Deliverable J — Slack Deployment Bot (optional)
+
+A Slack `/deploy <environment>` bot (separate repository — see the summary for
+the link) triggers the GitHub Actions pipeline via the `workflow_dispatch` API,
+validates the environment, and replies with the environment, run URL and
+timestamp.
+
+Evidence: `evidence/bot-command.png` (slash command + bot confirmation) ·
+`evidence/bot-pipeline-run.png` (the triggered run, started by the GitHub token).
+
+![bot slash command](evidence/bot-command.png)
+![bot-triggered pipeline run](evidence/bot-pipeline-run.png)
+
+---
+
+## Runbook — bring the whole system up from zero
+
+This runbook brings the entire seven-component architecture up from a clean cloud
+account with a single `git push`.
+
+### 1. Required account permissions
+
+- An AWS account; an operator able to run the **bootstrap** workspace once
+  (create the S3 state bucket, the DynamoDB lock table and the delegated Route 53
+  zone), and to create the GitHub Actions OIDC provider + CI runner role on the
+  first main-workspace apply.
+- After bootstrap, day-to-day deploys need **no long-lived AWS credentials** —
+  GitHub Actions assumes the `ci-runner` role via OIDC.
+
+### 2. One-time bootstrap (state backend + DNS delegation)
+
+```bash
+cd infra/bootstrap
+terraform init
+terraform apply        # creates the state bucket, lock table and the Route53 zone
+terraform output dns_name_servers   # send these + the subdomain to the instructor
+```
+
+Send `dns_subdomain` (`grupo7.oyd.solid.com.gt`) and the four `dns_name_servers`
+to the instructor so they delegate the subdomain from the parent
+`oyd.solid.com.gt` zone. Wait until delegation is live (`dig NS
+grupo7.oyd.solid.com.gt`) before the first main apply, or ACM DNS validation will
+hang. The bootstrap workspace is **not** destroyed by the one-click proof, so the
+name servers stay stable across destroy/re-apply cycles.
+
+### 3. GitHub Environments and variables/secrets to configure
+
+- **Environments:** `dev` (no reviewer) and `staging` (required reviewer). Set
+  each environment's *Deployment branches* policy to **`main` only**.
+- **Repository variable:** `AWS_CI_ROLE_ARN` = the `ci_runner_role_arn` Terraform
+  output.
+- **Repository secret:** `AWS_REGION` = `us-east-1`.
+- **Removed (do not re-add):** `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`,
+  `DEV_DB_PASSWORD`, `STAGING_DB_PASSWORD` — replaced by OIDC + Secrets Manager.
+
+### 4. Trigger the pipeline with one push
+
+```bash
+git clone https://github.com/PabloP150/TicketResolve.git
+cd TicketResolve
+git checkout main
+git commit --allow-empty -m "clean-state proof run"
+git push origin main          # Terraform CD: init -> plan -> apply (dev), then gated staging
+```
+
+### 5. Verify every component is running
+
+```bash
+cd infra
+terraform init -reconfigure -backend-config=envs/dev/backend-dev.hcl
+terraform output                     # all seven components' outputs
+terraform state list                 # one+ resource per category
+terraform plan -detailed-exitcode \
+  -var-file=envs/dev/dev.tfvars      # exit code 0 = idempotent
+
+curl -v https://api.grupo7.oyd.solid.com.gt/   # 200 + TLS cert
+curl -v http://app.grupo7.oyd.solid.com.gt/    # 301 -> https
+```
+
+> Backend note (Pattern A): the backend is partial — `terraform init` **must**
+> receive `-backend-config=envs/<env>/backend-<env>.hcl`; a bare `terraform init`
+> will not select the right state key.

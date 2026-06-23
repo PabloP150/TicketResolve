@@ -1,0 +1,30 @@
+# Delivery 5 — Deliverable D (TLS Termination) — curl evidence
+# Domain delegated by the instructor: grupo7.oyd.solid.com.gt
+# Both public endpoints covered by one wildcard ACM cert (regional, us-east-1).
+# ============================================================================
+
+### 1) https://api.grupo7.oyd.solid.com.gt/  — API Gateway custom domain (regional cert), HTTPS 200
+  * ALPN: curl offers h2,http/1.1
+  * SSL connection using TLSv1.3 / AEAD-AES128-GCM-SHA256 / [blank] / UNDEF
+  * ALPN: server accepted h2
+  * Server certificate:
+  *  subject: CN=grupo7.oyd.solid.com.gt
+  *  issuer: C=US; O=Amazon; CN=Amazon RSA 2048 M04
+  *  SSL certificate verify ok.
+  < HTTP/2 200 
+  < content-type: application/json
+
+### 2) https://app.grupo7.oyd.solid.com.gt/  — CloudFront, HTTPS 200
+  * SSL connection using TLSv1.3 / AEAD-AES128-GCM-SHA256 / [blank] / UNDEF
+  * Server certificate:
+  *  subject: CN=grupo7.oyd.solid.com.gt
+  *  issuer: C=US; O=Amazon; CN=Amazon RSA 2048 M04
+  *  SSL certificate verify ok.
+  < HTTP/2 200 
+  < x-cache: Miss from cloudfront
+  < via: 1.1 e95a92c96177cc787eec3850b97974d8.cloudfront.net (CloudFront)
+
+### 3) http://app.grupo7.oyd.solid.com.gt/  — HTTP 301 redirect to HTTPS (CloudFront)
+  < HTTP/1.1 301 Moved Permanently
+  < Server: CloudFront
+  < Location: https://app.grupo7.oyd.solid.com.gt/

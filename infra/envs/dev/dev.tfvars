@@ -48,8 +48,25 @@ consumer_reserved_concurrency = null
 sla_sweep_schedule_expression = "rate(1 day)"
 scheduler_timezone            = "America/Guatemala"
 
-# NOTE: db_password is intentionally NOT set here. It is injected at apply time
-# from the GitHub Environment secret DEV_DB_PASSWORD as TF_VAR_db_password.
+# NOTE: db_password is intentionally NOT set here. As of Delivery 5 the secret
+# lives in Secrets Manager; Terraform only seeds an initial version from the
+# var default, then ignores changes (the real value is managed in the console).
 
 # Ephemeral env: allow destroy to empty buckets so teardown/rebuild is one command.
 bucket_force_destroy = true
+
+# --- TLS (Delivery 5, Deliverable D) ---
+dns_subdomain = "grupo7.oyd.solid.com.gt"
+
+# --- Observability (Delivery 5, Deliverable E) ---
+log_retention_days       = 14
+alarm_notification_email = "pablo.pineda@galileo.edu"
+lambda_error_threshold   = 1
+apigw_5xx_threshold      = 1
+dlq_depth_threshold      = 1
+alarm_period_seconds     = 300
+alarm_evaluation_periods = 1
+# Near-$0 target: a low cap surfaces any unexpected spend (e.g. a forgotten
+# NAT gateway) the moment it crosses 80%.
+monthly_budget_usd                    = 5
+budget_notification_threshold_percent = 80

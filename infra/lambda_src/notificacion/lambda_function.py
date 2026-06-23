@@ -29,7 +29,39 @@ logger.setLevel(os.environ.get("LOG_LEVEL", "INFO"))
 
 ATTACHMENTS_BUCKET = os.environ["ATTACHMENTS_BUCKET"]
 
+# Delivery 5 — the database password is no longer injected as a plaintext env
+# var. Terraform injects only the secret's ARN (DB_SECRET_ARN); the handler
+# fetches the value at runtime via Secrets Manager GetSecretValue and caches it
+# for the container's lifetime (one call per cold start). Secrets Manager
+# decrypts it with the project CMK, which this function's execution role is
+# allowed to use (secretsmanager:GetSecretValue + kms:Decrypt, scoped ARNs).
+DB_SECRET_ARN = os.environ.get("DB_SECRET_ARN")
+
 _s3 = boto3.client("s3")
+_secrets = boto3.client("secretsmanager")
+
+_db_password_cache = None
+
+
+def _get_db_password():
+    """Fetch (and memoize) the DB password from Secrets Manager.
+
+    The value is never logged. Returns None when no secret ARN is configured
+    (e.g. local unit tests), so the consumer still runs without a credential.
+    """
+    global _db_password_cache
+    if _db_password_cache is not None:
+        return _db_password_cache
+    if not DB_SECRET_ARN:
+        return None
+    resp = _secrets.get_secret_value(SecretId=DB_SECRET_ARN)
+    _db_password_cache = resp.get("SecretString", "")
+    logger.info(
+        "loaded DB credential from Secrets Manager (arn=%s, length=%d)",
+        DB_SECRET_ARN,
+        len(_db_password_cache),
+    )
+    return _db_password_cache
 
 
 def _process_record(record):
@@ -67,6 +99,10 @@ def lambda_handler(event, context):
     message is returned to the queue (eventually the DLQ after max_receive_count),
     while the rest of the batch is deleted. An empty list means full success.
     """
+    # Ensure the DB credential is loaded from Secrets Manager (cached after the
+    # first cold-start call). Proves the GetSecretValue runtime-retrieval path.
+    _get_db_password()
+
     failures = []
     for record in event.get("Records", []):
         try:
