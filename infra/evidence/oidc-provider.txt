@@ -1,18 +1,20 @@
-# Delivery 5 — Deliverable C (OIDC) — provider provisioned via Terraform
-# ============================================================================
-ci_runner_role_arn = arn:aws:iam::010526283195:role/ticketresolve-dev-ci-runner
-oidc_provider_arn  = arn:aws:iam::010526283195:oidc-provider/token.actions.githubusercontent.com
+=== OIDC CI Authentication — Delivery 5, Deliverable C ===
+Generated: 2026-06-23T04:43:38Z
 
-## aws iam list-open-id-connect-providers:
-{
-    "OpenIDConnectProviderList": [
-        {
-            "Arn": "arn:aws:iam::010526283195:oidc-provider/token.actions.githubusercontent.com"
-        }
-    ]
-}
+### GitHub Actions OIDC provider (lives in bootstrap workspace)
+arn:aws:iam::010526283195:oidc-provider/token.actions.githubusercontent.com
+------------------------------------------------
+|           GetOpenIDConnectProvider           |
++-----+----------------------------------------+
+|  Url|  token.actions.githubusercontent.com   |
++-----+----------------------------------------+
+||                ClientIDList                ||
+|+--------------------------------------------+|
+||  sts.amazonaws.com                         ||
+|+--------------------------------------------+|
 
-## CI runner role trust policy (scoped to repo subjects, no wildcard):
+### CI runner role — trust policy scoped to this repo's subjects (no wildcard)
+arn:aws:iam::010526283195:role/ticketresolve-ci-runner
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -25,14 +27,17 @@ oidc_provider_arn  = arn:aws:iam::010526283195:oidc-provider/token.actions.githu
             "Action": "sts:AssumeRoleWithWebIdentity",
             "Condition": {
                 "StringEquals": {
-                    "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
                     "token.actions.githubusercontent.com:sub": [
                         "repo:PabloP150/TicketResolve:ref:refs/heads/main",
                         "repo:PabloP150/TicketResolve:environment:dev",
                         "repo:PabloP150/TicketResolve:environment:staging"
-                    ]
+                    ],
+                    "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
                 }
             }
         }
     ]
 }
+
+### No long-lived AWS access keys in repo/environment secrets (gh secret list)
+AWS_REGION	2026-05-11T03:45:30Z
