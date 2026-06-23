@@ -32,10 +32,14 @@ locals {
   # (CI prerequisite). Reconstructed as a string here for the KMS key policy.
   ci_runner_role_arn = "arn:aws:iam::${local.account_id}:role/${var.app_name}-ci-runner"
 
-  # KMS key administrators: the human deployer running terraform locally, plus
-  # the CI runner role that runs terraform in GitHub Actions.
-  kms_key_admin_principal_arns = [
-    data.aws_caller_identity.current.arn,
-    local.ci_runner_role_arn,
-  ]
+  # KMS key administrators. Must be STABLE principal ARNs matched against
+  # aws:PrincipalArn (which, for an assumed role, is the ROLE arn — not the
+  # session arn). Using data.aws_caller_identity.current.arn here was a bug: it
+  # returns the CI session arn under GitHub Actions, which never matches
+  # aws:PrincipalArn and locks out everyone else. We list the CI runner ROLE
+  # plus the human operator user explicitly.
+  kms_key_admin_principal_arns = concat(
+    [local.ci_runner_role_arn],
+    var.kms_admin_principal_arns,
+  )
 }

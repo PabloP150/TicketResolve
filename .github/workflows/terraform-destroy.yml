@@ -34,14 +34,16 @@ jobs:
     # configured reviewer to approve.
     environment: ${{ inputs.environment }}
     steps:
+      # Checkout first: later steps use working-directory: infra/, which only
+      # exists after the repo is checked out.
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Confirm target
         run: |
           echo "Destroying environment: ${{ inputs.environment }}"
           echo "Backend config: envs/${{ inputs.environment }}/backend-${{ inputs.environment }}.hcl"
           echo "Var file:       envs/${{ inputs.environment }}/${{ inputs.environment }}.tfvars"
-
-      - name: Checkout
-        uses: actions/checkout@v4
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3

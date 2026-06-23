@@ -156,7 +156,10 @@ data "aws_iam_policy_document" "ci_runner" {
       "s3:*", "dynamodb:*", "lambda:*", "apigateway:*", "logs:*",
       "iam:*", "kms:*", "secretsmanager:*", "sns:*", "sqs:*",
       "scheduler:*", "cloudwatch:*", "budgets:*", "route53:*",
-      "acm:*", "cloudfront:*", "ec2:Describe*",
+      "acm:*", "cloudfront:*",
+      # ec2:* (not just Describe) — the network module CREATES the VPC, subnets,
+      # IGW, route tables, security groups, NACLs and gateway endpoints.
+      "ec2:*",
     ]
     resources = ["*"]
   }
