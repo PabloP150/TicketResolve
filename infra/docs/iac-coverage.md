@@ -44,8 +44,8 @@ observability**.
 | Scheduled SLA sweep | Amazon EventBridge Scheduler | `aws_scheduler_schedule` | `infra/modules/scheduler` |
 | **Security / IAM** | | | |
 | Per-service execution roles (×6) | AWS IAM | `aws_iam_role` + `aws_iam_policy` + `aws_iam_role_policy_attachment` | `infra/modules/iam` |
-| CI runner role (OIDC-assumable) | AWS IAM | `aws_iam_role` + `aws_iam_policy` | `infra/modules/iam` |
-| GitHub Actions OIDC provider | AWS IAM | `aws_iam_openid_connect_provider` | `infra/modules/iam` |
+| CI runner role (OIDC-assumable) | AWS IAM | `aws_iam_role` + `aws_iam_policy` | `infra/bootstrap` (CI prerequisite — survives main destroy) |
+| GitHub Actions OIDC provider | AWS IAM | `aws_iam_openid_connect_provider` | `infra/bootstrap` (CI prerequisite — survives main destroy) |
 | Customer-managed key (CMK) | AWS KMS | `aws_kms_key`, `aws_kms_alias` | `infra/modules/security_kms` |
 | DB password secret | AWS Secrets Manager | `aws_secretsmanager_secret`, `_version` | `infra/modules/security_kms` |
 | **Observability** | | | |

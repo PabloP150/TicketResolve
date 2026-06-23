@@ -28,7 +28,9 @@ locals {
   region     = data.aws_region.current.name
 
   escalamiento_function_arn = "arn:aws:lambda:${local.region}:${local.account_id}:function:${local.lambda_names.escalamiento}"
-  ci_runner_role_arn        = "arn:aws:iam::${local.account_id}:role/${local.name_prefix}-ci-runner"
+  # CI runner role is project-level and lives in the bootstrap workspace
+  # (CI prerequisite). Reconstructed as a string here for the KMS key policy.
+  ci_runner_role_arn = "arn:aws:iam::${local.account_id}:role/${var.app_name}-ci-runner"
 
   # KMS key administrators: the human deployer running terraform locally, plus
   # the CI runner role that runs terraform in GitHub Actions.

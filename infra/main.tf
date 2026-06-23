@@ -45,8 +45,6 @@ module "iam" {
   notificacion_function_name = local.lambda_names.notificacion
   reporte_function_name      = local.lambda_names.reporte_pdf
 
-  github_repo = var.github_repo
-
   tags = {
     Application = var.app_name
   }

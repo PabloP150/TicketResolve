@@ -512,9 +512,14 @@ account with a single `git push`.
 ```bash
 cd infra/bootstrap
 terraform init
-terraform apply        # creates the state bucket, lock table and the Route53 zone
+terraform apply        # state bucket, lock table, Route53 zone, GitHub OIDC provider + CI runner role
 terraform output dns_name_servers   # send these + the subdomain to the instructor
+terraform output ci_runner_role_arn # set this as the AWS_CI_ROLE_ARN GitHub Actions variable
 ```
+
+The OIDC provider and CI runner role are created here (not in the main
+workspace) on purpose: the CD pipeline assumes that role via OIDC, so it must
+exist before — and survive a destroy of — the main workspace.
 
 Send `dns_subdomain` (`grupo7.oyd.solid.com.gt`) and the four `dns_name_servers`
 to the instructor so they delegate the subdomain from the parent

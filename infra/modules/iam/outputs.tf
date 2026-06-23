@@ -29,11 +29,6 @@ output "scheduler_role_arn" {
   value       = aws_iam_role.scheduler.arn
 }
 
-output "ci_runner_role_arn" {
-  description = "ARN of the OIDC-assumable CI runner role. Referenced by the GitHub Actions workflows' role-to-assume input."
-  value       = aws_iam_role.ci_runner.arn
-}
-
 # --- Policy ARNs (rubric A: expose each policy ARN) -------------------------
 output "compute_api_policy_arn" {
   description = "ARN of the api-tickets managed policy."
@@ -63,15 +58,4 @@ output "compute_reporte_policy_arn" {
 output "scheduler_policy_arn" {
   description = "ARN of the scheduler invoke managed policy."
   value       = aws_iam_policy.scheduler.arn
-}
-
-output "ci_runner_policy_arn" {
-  description = "ARN of the CI runner managed policy."
-  value       = aws_iam_policy.ci_runner.arn
-}
-
-# --- OIDC provider ----------------------------------------------------------
-output "oidc_provider_arn" {
-  description = "ARN of the GitHub Actions OIDC provider. Used in the CI runner role's trust policy and surfaced for evidence (aws iam list-open-id-connect-providers)."
-  value       = aws_iam_openid_connect_provider.github.arn
 }
