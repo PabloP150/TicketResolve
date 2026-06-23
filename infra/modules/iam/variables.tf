@@ -49,6 +49,16 @@ variable "escalamiento_function_arn" {
   type        = string
 }
 
+variable "reporte_function_arn" {
+  description = "ARN of the reporte-pdf Lambda. The api-tickets role may lambda:InvokeFunction ONLY this function ARN (async report trigger, US-06). Constructed string to avoid a dependency cycle."
+  type        = string
+}
+
+variable "notifications_topic_arn" {
+  description = "ARN of the application notifications SNS topic. The async-consumer (notificacion) role is granted sns:Publish scoped to this single topic."
+  type        = string
+}
+
 variable "kms_key_arn" {
   description = "ARN of the project CMK. The async-consumer role is granted kms:Decrypt on this key so S3/SSE-KMS object reads and the secret decrypt succeed."
   type        = string

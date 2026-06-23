@@ -61,6 +61,10 @@ dns_subdomain = "grupo7.oyd.solid.com.gt"
 # --- Observability (Delivery 5, Deliverable E) ---
 log_retention_days       = 14
 alarm_notification_email = "pablo.pineda@galileo.edu"
+
+# Application notifications (US-05/US-06) — ticket escalations/resolutions and
+# report-ready links. Same inbox as alarms for this environment.
+notifications_email      = "pablo.pineda@galileo.edu"
 lambda_error_threshold   = 1
 apigw_5xx_threshold      = 1
 dlq_depth_threshold      = 1

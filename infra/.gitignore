@@ -1,1 +1,5 @@
 infra/bootstrap/terraform.tfstate.backup
+
+# Generated Lambda packages (assembled by scripts/package_lambdas.sh).
+# Reproducible from Dev/src; never committed.
+build/

@@ -15,9 +15,14 @@ variable "api_subdomain_label" {
 }
 
 variable "app_subdomain_label" {
-  description = "Label prepended to the subdomain for the CloudFront endpoint (default 'app' -> app.<subdomain>). CloudFront fronts the API to provide the HTTP->HTTPS 301 redirect that an HTTPS-only API Gateway custom domain cannot."
+  description = "Label prepended to the subdomain for the CloudFront endpoint (default 'app' -> app.<subdomain>). CloudFront serves the React SPA from a private S3 bucket and provides the HTTP->HTTPS 301 redirect that an HTTPS-only origin cannot."
   type        = string
   default     = "app"
+}
+
+variable "spa_bucket_name" {
+  description = "Name of the private S3 bucket that stores the built React SPA. CloudFront reads it via an Origin Access Control; the bucket blocks all public access."
+  type        = string
 }
 
 variable "api_id" {

@@ -91,6 +91,14 @@ data "aws_iam_policy_document" "compute_api" {
     resources = [var.queue_arn]
   }
   statement {
+    # POST /api/v1/reports fires the reporte-pdf worker asynchronously
+    # (InvocationType=Event) so the heavy scan/render never blocks the request.
+    sid       = "InvokeReportWorker"
+    effect    = "Allow"
+    actions   = ["lambda:InvokeFunction"]
+    resources = [var.reporte_function_arn]
+  }
+  statement {
     # S3 objects are encrypted with the CMK, so reads need Decrypt and writes
     # need GenerateDataKey on that one key.
     sid       = "UseCMKForS3"
@@ -160,7 +168,7 @@ resource "aws_iam_role_policy_attachment" "compute_webhook" {
 # ===========================================================================
 resource "aws_iam_role" "compute_escalamiento" {
   name               = "${local.name_prefix}-compute-escalamiento"
-  description        = "Execution role for the escalamiento Lambda. DynamoDB RW on the table+GSIs and writes to its own log group."
+  description        = "Execution role for the escalamiento Lambda. DynamoDB RW on the table+GSIs, SQS SendMessage on the events queue (escalation notifications), and writes to its own log group."
   assume_role_policy = data.aws_iam_policy_document.lambda_assume.json
   tags               = local.module_tags
 }
@@ -171,6 +179,14 @@ data "aws_iam_policy_document" "compute_escalamiento" {
     effect    = "Allow"
     actions   = local.dynamodb_rw_actions
     resources = local.dynamodb_resources
+  }
+  statement {
+    # On auto-escalation the worker enqueues a notification event for the
+    # notificacion consumer to fan out (US-04 -> US-05).
+    sid       = "SQSSendEvents"
+    effect    = "Allow"
+    actions   = ["sqs:SendMessage", "sqs:GetQueueAttributes"]
+    resources = [var.queue_arn]
   }
   statement {
     sid       = "WriteOwnLogs"
@@ -198,7 +214,7 @@ resource "aws_iam_role_policy_attachment" "compute_escalamiento" {
 # ===========================================================================
 resource "aws_iam_role" "async_consumer" {
   name               = "${local.name_prefix}-async-consumer"
-  description        = "Execution role for the notificacion async consumer. Consumes the events queue, writes event objects to the attachments bucket, reads the DB password secret and decrypts with the CMK, and writes to its own log group."
+  description        = "Execution role for the notificacion async consumer. Consumes the events queue, publishes notifications to the SNS topic, and writes to its own log group. (S3/secret/KMS grants retained from Delivery 5.)"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume.json
   tags               = local.module_tags
 }
@@ -209,6 +225,13 @@ data "aws_iam_policy_document" "async_consumer" {
     effect    = "Allow"
     actions   = ["sqs:ReceiveMessage", "sqs:DeleteMessage", "sqs:GetQueueAttributes"]
     resources = [var.queue_arn]
+  }
+  statement {
+    # Fan domain events out to subscribers (email) via the notifications topic.
+    sid       = "SNSPublishNotifications"
+    effect    = "Allow"
+    actions   = ["sns:Publish"]
+    resources = [var.notifications_topic_arn]
   }
   statement {
     sid       = "S3WriteEventObjects"
@@ -256,7 +279,7 @@ resource "aws_iam_role_policy_attachment" "async_consumer" {
 # ===========================================================================
 resource "aws_iam_role" "compute_reporte" {
   name               = "${local.name_prefix}-compute-reporte"
-  description        = "Execution role for the reporte-pdf Lambda. DynamoDB read-only on the table+GSIs, s3:PutObject on the reports bucket, and writes to its own log group."
+  description        = "Execution role for the reporte-pdf Lambda. DynamoDB read-only on the table+GSIs, s3:PutObject on the reports bucket, SQS SendMessage on the events queue (report-ready notification), and writes to its own log group."
   assume_role_policy = data.aws_iam_policy_document.lambda_assume.json
   tags               = local.module_tags
 }
@@ -273,6 +296,14 @@ data "aws_iam_policy_document" "compute_reporte" {
     effect    = "Allow"
     actions   = ["s3:PutObject"]
     resources = ["${var.reports_bucket_arn}/*"]
+  }
+  statement {
+    # After generating a report the worker enqueues a REPORT_READY event so the
+    # notificacion consumer can email the download link (US-06).
+    sid       = "SQSSendEvents"
+    effect    = "Allow"
+    actions   = ["sqs:SendMessage", "sqs:GetQueueAttributes"]
+    resources = [var.queue_arn]
   }
   statement {
     # Writing CMK-encrypted objects to the reports bucket needs GenerateDataKey.

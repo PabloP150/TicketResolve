@@ -36,6 +36,8 @@ module "iam" {
   queue_arn              = module.events_queue.queue_arn
 
   escalamiento_function_arn = local.escalamiento_function_arn
+  reporte_function_arn      = local.reporte_function_arn
+  notifications_topic_arn   = aws_sns_topic.notifications.arn
   kms_key_arn               = module.security_kms.kms_key_arn
   secret_arn                = module.security_kms.secret_arn
 
@@ -138,6 +140,30 @@ module "events_queue" {
 }
 
 # ---------------------------------------------------------------------------
+# Notifications topic (US-05/US-06) — the notificacion consumer publishes
+# human-readable ticket events here (escalations, resolutions, report links)
+# and SNS fans them out to the subscribed email. Distinct from the
+# observability alarm topic so ops alerts and product notifications stay
+# separate. The email subscription is optional (created only when an address
+# is provided) and requires a one-time confirmation click.
+# ---------------------------------------------------------------------------
+resource "aws_sns_topic" "notifications" {
+  name = "${local.name_prefix}-notifications"
+
+  tags = {
+    Application = var.app_name
+    Environment = var.environment
+  }
+}
+
+resource "aws_sns_topic_subscription" "notifications_email" {
+  count     = var.notifications_email != "" ? 1 : 0
+  topic_arn = aws_sns_topic.notifications.arn
+  protocol  = "email"
+  endpoint  = var.notifications_email
+}
+
+# ---------------------------------------------------------------------------
 # Compute — five Lambdas, each instantiated from the same compute module.
 # As of Delivery 5 each function's execution role is defined centrally in
 # module.iam (one explicitly scoped, wildcard-free role per service) and wired
@@ -152,16 +178,21 @@ module "lambda_api_tickets" {
   memory_size   = 512
   timeout       = var.lambda_timeout_default
 
-  # Real handler for the Delivery 3 end-to-end proof (GET DynamoDB / POST S3).
-  source_dir = "${path.module}/lambda_src/api_tickets"
+  # Real application handler, assembled by infra/scripts/package_lambdas.sh
+  # (shared/ + api_tickets/). Handler is package-qualified.
+  source_dir = "${path.module}/build/lambda/api_tickets"
+  handler    = "api_tickets.lambda_function.lambda_handler"
 
   execution_role_arn = module.iam.compute_api_role_arn
 
   environment_variables = {
     TABLE_NAME         = module.database.table_name
     ATTACHMENTS_BUCKET = module.attachments_bucket.bucket_name
-    # Delivery 4 — producer target queue, wired from the async module output.
+    # Producer target queue (notification events) — read by shared.events.
     QUEUE_URL = module.events_queue.queue_url
+    # Async report trigger (US-06): the function to InvocationType=Event invoke.
+    REPORT_FUNCTION_NAME = local.lambda_names.reporte_pdf
+    LOG_LEVEL            = var.log_level
   }
 }
 
@@ -188,10 +219,17 @@ module "lambda_escalamiento" {
   memory_size   = var.lambda_memory_default
   timeout       = 60
 
+  # Real SLA-breach escalation worker (shared/ + escalamiento/).
+  source_dir = "${path.module}/build/lambda/escalamiento"
+  handler    = "escalamiento.lambda_function.lambda_handler"
+
   execution_role_arn = module.iam.compute_escalamiento_role_arn
 
   environment_variables = {
     TABLE_NAME = module.database.table_name
+    # Enqueue escalation notifications for the notificacion consumer.
+    QUEUE_URL = module.events_queue.queue_url
+    LOG_LEVEL = var.log_level
   }
 }
 
@@ -205,8 +243,10 @@ module "lambda_notificacion" {
   # slow invocation cannot let the same message be re-delivered mid-flight.
   timeout = 60
 
-  # Delivery 4 — real async consumer handler: reads SQS records, writes to S3.
-  source_dir = "${path.module}/lambda_src/notificacion"
+  # Real async notification consumer (shared/ + notificacion/): reads SQS
+  # records and fans them out to SNS.
+  source_dir = "${path.module}/build/lambda/notificacion"
+  handler    = "notificacion.lambda_function.lambda_handler"
 
   # Bound concurrency so a queue flood cannot exhaust downstream throughput.
   reserved_concurrent_executions = var.consumer_reserved_concurrency
@@ -214,11 +254,13 @@ module "lambda_notificacion" {
   execution_role_arn = module.iam.async_consumer_role_arn
 
   environment_variables = {
+    # Target topic for the email fan-out (US-05).
+    SNS_TOPIC_ARN      = aws_sns_topic.notifications.arn
     ATTACHMENTS_BUCKET = module.attachments_bucket.bucket_name
-    # Delivery 5 — only the secret ARN is injected (never the value). The
-    # handler calls GetSecretValue at startup, retiring the TF_VAR_db_password
-    # plaintext env-var pattern from Delivery 3/4.
+    # Delivery 5 — only the secret ARN is injected (never the value). Retained
+    # for the GetSecretValue evidence path; unused by the SNS-publishing worker.
     DB_SECRET_ARN = module.security_kms.secret_arn
+    LOG_LEVEL     = var.log_level
   }
 }
 
@@ -250,11 +292,18 @@ module "lambda_reporte_pdf" {
   memory_size   = 1024
   timeout       = 60
 
+  # Real monthly-report worker (shared/ + reporte_pdf/ + vendored fpdf2/Pillow).
+  source_dir = "${path.module}/build/lambda/reporte_pdf"
+  handler    = "reporte_pdf.lambda_function.lambda_handler"
+
   execution_role_arn = module.iam.compute_reporte_role_arn
 
   environment_variables = {
     TABLE_NAME     = module.database.table_name
     REPORTS_BUCKET = module.reports_bucket.bucket_name
+    # Enqueue a REPORT_READY event with the download link (US-06).
+    QUEUE_URL = module.events_queue.queue_url
+    LOG_LEVEL = var.log_level
   }
 }
 
@@ -349,6 +398,8 @@ module "tls" {
   # get an env suffix so they never collide on the shared delegated zone.
   api_subdomain_label = var.environment == "dev" ? "api" : "api-${var.environment}"
   app_subdomain_label = var.environment == "dev" ? "app" : "app-${var.environment}"
+
+  spa_bucket_name = local.spa_bucket_name
 
   tags = {
     Application = var.app_name

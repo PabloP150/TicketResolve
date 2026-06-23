@@ -76,6 +76,16 @@ jobs:
           role-to-assume: ${{ vars.AWS_CI_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      # Assemble the real Lambda packages from Dev/src before plan: archive_file
+      # reads build/lambda/<fn>/ at plan time, and that dir is gitignored.
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build Lambda packages
+        run: bash scripts/package_lambdas.sh
+
       - name: Terraform Init (dev backend)
         run: terraform init -input=false -lock-timeout=120s -backend-config=envs/dev/backend-dev.hcl
 
