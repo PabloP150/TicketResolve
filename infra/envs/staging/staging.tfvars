@@ -66,6 +66,7 @@ dns_subdomain = "grupo7.oyd.solid.com.gt"
 # window, and runs a slightly larger budget for its heavier load profile.
 log_retention_days                    = 30
 alarm_notification_email              = "pablo.pineda@galileo.edu"
+notifications_email                   = "pablo.pineda@galileo.edu"
 lambda_error_threshold                = 1
 apigw_5xx_threshold                   = 2
 dlq_depth_threshold                   = 1

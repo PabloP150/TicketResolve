@@ -56,6 +56,16 @@ jobs:
           role-to-assume: ${{ vars.AWS_CI_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      # Even destroy evaluates the full config (incl. archive_file source_dir),
+      # so the gitignored build/lambda packages must exist first.
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build Lambda packages
+        run: bash scripts/package_lambdas.sh
+
       - name: Terraform Init (${{ inputs.environment }} backend)
         run: terraform init -input=false -lock-timeout=120s -backend-config=envs/${{ inputs.environment }}/backend-${{ inputs.environment }}.hcl
 

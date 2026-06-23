@@ -1,0 +1,71 @@
+name: Dev CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Dev/**"
+      - ".github/workflows/dev-ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "Dev/**"
+      - ".github/workflows/dev-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend — pytest + coverage
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Dev/
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: Dev/requirements-dev.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      # No requiere credenciales AWS: moto mockea DynamoDB y S3 en memoria.
+      # Umbral de cobertura 80% sobre src/ (suite actual: 82 tests). Subir el umbral
+      # a medida que crezca la cobertura; bajarlo requiere justificación en PR.
+      - name: Run tests with coverage
+        run: pytest --cov=src --cov-report=term-missing --cov-fail-under=80
+
+  frontend:
+    name: Frontend — build + test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Dev/frontend/
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: Dev/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (tsc + vite)
+        run: npm run build
+
+      - name: Test (vitest)
+        run: npm test

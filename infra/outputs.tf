@@ -69,7 +69,7 @@ output "lambda_function_arns" {
 # --- Ingress (API Gateway) outputs -------------------------------------------
 
 output "api_gateway_endpoint" {
-  description = "Public HTTPS endpoint for the API Gateway HTTP API. Routes: GET/POST /api/v1/incidents, POST /api/v1/webhooks, GET health check."
+  description = "Public HTTPS endpoint for the API Gateway HTTP API. Routes: incidents CRUD + state machine, comments, reassignment, POST /api/v1/webhooks/alerts, POST /api/v1/reports, health check."
   value       = module.ingress.api_endpoint
 }
 
@@ -234,8 +234,18 @@ output "api_custom_domain_url" {
 }
 
 output "app_cloudfront_url" {
-  description = "Public HTTPS URL served by CloudFront. Also issues an HTTP 301 redirect to HTTPS on port 80. null when enable_tls = false."
+  description = "Public HTTPS URL served by CloudFront (the React SPA). Also issues an HTTP 301 redirect to HTTPS on port 80. null when enable_tls = false."
   value       = one(module.tls[*].app_url)
+}
+
+output "spa_bucket_name" {
+  description = "Private S3 bucket the built SPA is uploaded to (deploy target). null when enable_tls = false."
+  value       = one(module.tls[*].spa_bucket_name)
+}
+
+output "spa_cloudfront_distribution_id" {
+  description = "CloudFront distribution ID for the SPA — used to invalidate the cache after a deploy. null when enable_tls = false."
+  value       = one(module.tls[*].cloudfront_distribution_id)
 }
 
 output "public_endpoints" {
@@ -244,6 +254,18 @@ output "public_endpoints" {
     api_gateway_custom_domain = one(module.tls[*].api_url)
     cloudfront                = one(module.tls[*].app_url)
   } : {}
+}
+
+output "canonical_api_url" {
+  description = "The HTTPS base URL clients (and the SPA's VITE_API_BASE) should use: the TLS custom domain when enable_tls = true, otherwise the API Gateway execute-api endpoint. Both are HTTPS."
+  value       = var.enable_tls ? one(module.tls[*].api_url) : module.ingress.api_endpoint
+}
+
+# --- Application notifications (US-05/US-06) ---------------------------------
+
+output "notifications_topic_arn" {
+  description = "ARN of the SNS topic the notificacion worker publishes ticket events to (escalations, resolutions, report-ready links)."
+  value       = aws_sns_topic.notifications.arn
 }
 
 # --- Delivery 5: Observability (Deliverable E) -------------------------------

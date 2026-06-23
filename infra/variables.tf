@@ -243,6 +243,18 @@ variable "alarm_notification_email" {
   type        = string
 }
 
+variable "notifications_email" {
+  description = "Email subscribed to the application notifications SNS topic (ticket escalations/resolutions, report-ready links — US-05/US-06). AWS sends a one-time confirmation email that must be accepted. Leave empty to create the topic without an email subscription."
+  type        = string
+  default     = ""
+}
+
+variable "log_level" {
+  description = "Log level injected into every application Lambda (LOG_LEVEL env var). DEBUG/INFO/WARNING/ERROR."
+  type        = string
+  default     = "INFO"
+}
+
 variable "lambda_error_threshold" {
   description = "Lambda Errors count within an evaluation period that trips the per-function error alarm."
   type        = number

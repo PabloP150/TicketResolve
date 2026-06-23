@@ -38,6 +38,16 @@ jobs:
           role-to-assume: ${{ vars.AWS_CI_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      # archive_file reads build/lambda/<fn>/ (gitignored) when evaluating the
+      # config, so the packages must exist before plan even for drift detection.
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build Lambda packages
+        run: bash scripts/package_lambdas.sh
+
       - name: Terraform Init (dev backend)
         run: terraform init -input=false -lock-timeout=120s -backend-config=envs/dev/backend-dev.hcl
 

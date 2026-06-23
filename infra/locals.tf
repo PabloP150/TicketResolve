@@ -5,6 +5,7 @@ locals {
   # Derived naming so every resource is built from var.app_name + var.environment, never hardcoded.
   attachments_bucket_name = "${var.app_name}-attachments-${var.environment}-${data.aws_caller_identity.current.account_id}"
   reports_bucket_name     = "${var.app_name}-reports-${var.environment}-${data.aws_caller_identity.current.account_id}"
+  spa_bucket_name         = "${var.app_name}-spa-${var.environment}-${data.aws_caller_identity.current.account_id}"
   database_table_name     = "${var.app_name}-${var.environment}"
   api_name                = "${var.app_name}-api-${var.environment}"
 
@@ -28,6 +29,7 @@ locals {
   region     = data.aws_region.current.name
 
   escalamiento_function_arn = "arn:aws:lambda:${local.region}:${local.account_id}:function:${local.lambda_names.escalamiento}"
+  reporte_function_arn      = "arn:aws:lambda:${local.region}:${local.account_id}:function:${local.lambda_names.reporte_pdf}"
   # CI runner role is project-level and lives in the bootstrap workspace
   # (CI prerequisite). Reconstructed as a string here for the KMS key policy.
   ci_runner_role_arn = "arn:aws:iam::${local.account_id}:role/${var.app_name}-ci-runner"

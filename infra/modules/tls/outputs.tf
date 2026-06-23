@@ -32,3 +32,13 @@ output "apigw_target_domain_name" {
   description = "The regional target domain name of the API Gateway custom domain (the alias target)."
   value       = aws_apigatewayv2_domain_name.api.domain_name_configuration[0].target_domain_name
 }
+
+output "spa_bucket_name" {
+  description = "Name of the private S3 bucket the built SPA is uploaded to (deploy target for aws s3 sync)."
+  value       = aws_s3_bucket.spa.bucket
+}
+
+output "cloudfront_distribution_id" {
+  description = "CloudFront distribution ID — used to create an invalidation after a SPA deploy."
+  value       = aws_cloudfront_distribution.this.id
+}
