@@ -458,30 +458,9 @@ module "observability" {
     Application = var.app_name
   }
 }
-
-# ---------------------------------------------------------------------------
-# Seed data for the E2E proof — committed to the repo (not inserted via the
-# console). The GET /api/v1/incidents endpoint reads exactly this item.
-# ---------------------------------------------------------------------------
-resource "aws_dynamodb_table_item" "seed_ticket" {
-  table_name = module.database.table_name
-  hash_key   = "PK"
-  range_key  = "SK"
-
-  item = jsonencode({
-    PK       = { S = "TICKET#seed" }
-    SK       = { S = "META" }
-    GSI1PK   = { S = "ASSIGN#unassigned" }
-    GSI1SK   = { S = "STATUS#OPEN#SLA#2026-06-07T23:55:00Z" }
-    title    = { S = "Seed incident for the Delivery 3 end-to-end proof" }
-    severity = { S = "P2" }
-    status   = { S = "OPEN" }
-    source   = { S = "terraform-seed" }
-  })
-
-  lifecycle {
-    # The seed item proves the read path; ignore drift if the handler ever
-    # mutates it, so a later apply does not fight application writes.
-    ignore_changes = [item]
-  }
-}
+# NOTE: the Delivery-3 read-path seed item (aws_dynamodb_table_item.seed_ticket,
+# PK=TICKET#seed) was removed once the real application was deployed. It was
+# seeded WITHOUT assignee/service/ticket_id, so the live dashboard crashed
+# rendering it (AssigneeAvatar called .trim() on a null assignee). The real app
+# creates its own tickets (assignee defaults to "UNASSIGNED"), so the seed is no
+# longer needed for the read path.
