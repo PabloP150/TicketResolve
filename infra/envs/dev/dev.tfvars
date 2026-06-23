@@ -45,7 +45,7 @@ event_source_bisect_on_error             = true
 consumer_reserved_concurrency = null
 
 # --- Scheduled job (Delivery 4) ---
-sla_sweep_schedule_expression = "rate(1 day)"
+sla_sweep_schedule_expression = "rate(10 minutes)"
 scheduler_timezone            = "America/Guatemala"
 
 # NOTE: db_password is intentionally NOT set here. As of Delivery 5 the secret
