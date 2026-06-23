@@ -1,30 +1,20 @@
-# Delivery 5 — Deliverable D (TLS Termination) — curl evidence
-# Domain delegated by the instructor: grupo7.oyd.solid.com.gt
-# Both public endpoints covered by one wildcard ACM cert (regional, us-east-1).
-# ============================================================================
+=== TLS Evidence — Delivery 5, Deliverable D ===
+Generated: 2026-06-23T04:42:32Z
 
-### 1) https://api.grupo7.oyd.solid.com.gt/  — API Gateway custom domain (regional cert), HTTPS 200
-  * ALPN: curl offers h2,http/1.1
-  * SSL connection using TLSv1.3 / AEAD-AES128-GCM-SHA256 / [blank] / UNDEF
-  * ALPN: server accepted h2
-  * Server certificate:
-  *  subject: CN=grupo7.oyd.solid.com.gt
-  *  issuer: C=US; O=Amazon; CN=Amazon RSA 2048 M04
-  *  SSL certificate verify ok.
-  < HTTP/2 200 
-  < content-type: application/json
+### 1) API Gateway custom domain (regional ACM cert) — HTTPS 200
+$ curl -sS -o /dev/null -w 'HTTP %{http_code}  TLS %{ssl_verify_result}  cert-CN via -v
+' https://api.grupo7.oyd.solid.com.gt/
+HTTP 200  ssl_verify_result=0
 
-### 2) https://app.grupo7.oyd.solid.com.gt/  — CloudFront, HTTPS 200
-  * SSL connection using TLSv1.3 / AEAD-AES128-GCM-SHA256 / [blank] / UNDEF
-  * Server certificate:
-  *  subject: CN=grupo7.oyd.solid.com.gt
-  *  issuer: C=US; O=Amazon; CN=Amazon RSA 2048 M04
-  *  SSL certificate verify ok.
-  < HTTP/2 200 
-  < x-cache: Miss from cloudfront
-  < via: 1.1 e95a92c96177cc787eec3850b97974d8.cloudfront.net (CloudFront)
+### 2) CloudFront (app) — HTTP -> HTTPS 301 redirect
+$ curl -sS -o /dev/null -w 'HTTP %{http_code}  -> %{redirect_url}' http://app.grupo7.oyd.solid.com.gt/
+HTTP 301  -> https://app.grupo7.oyd.solid.com.gt/
 
-### 3) http://app.grupo7.oyd.solid.com.gt/  — HTTP 301 redirect to HTTPS (CloudFront)
-  < HTTP/1.1 301 Moved Permanently
-  < Server: CloudFront
-  < Location: https://app.grupo7.oyd.solid.com.gt/
+### 3) CloudFront (app) — HTTPS 200
+HTTP 200  ssl_verify_result=0
+
+### 4) Certificate detail (api) — issuer/subject/dates
+subject=CN=grupo7.oyd.solid.com.gt
+issuer=C=US, O=Amazon, CN=Amazon RSA 2048 M01
+notBefore=Jun 23 00:00:00 2026 GMT
+notAfter=Jan  6 23:59:59 2027 GMT

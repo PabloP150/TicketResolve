@@ -1,187 +1,180 @@
-module.lambda_escalamiento.data.archive_file.placeholder[0]: Reading...
-module.lambda_reporte_pdf.data.archive_file.placeholder[0]: Reading...
-module.lambda_notificacion.data.archive_file.from_source[0]: Reading...
-module.lambda_api_tickets.data.archive_file.from_source[0]: Reading...
-module.lambda_webhook_ingesta.data.archive_file.placeholder[0]: Reading...
-module.lambda_webhook_ingesta.data.archive_file.placeholder[0]: Read complete after 0s [id=da4d798a93ca7521f1c13b240b81b63fdab0994b]
-module.lambda_reporte_pdf.data.archive_file.placeholder[0]: Read complete after 0s [id=c068d0ecf86332931bcd0a400f99ff4423b6346f]
-module.lambda_escalamiento.data.archive_file.placeholder[0]: Read complete after 0s [id=8439f7904db11e1f17585423b3ee173cf01a916a]
-module.lambda_notificacion.data.archive_file.from_source[0]: Read complete after 0s [id=91931f62b320edb677cfc4ee3c1c42bf28124fb9]
-module.lambda_api_tickets.data.archive_file.from_source[0]: Read complete after 0s [id=90a48496bfc8d97e0d1d6941cef45157c752beec]
-data.aws_caller_identity.current: Reading...
-module.tls[0].data.aws_route53_zone.this: Reading...
-module.network.data.aws_region.current: Reading...
-module.iam.data.aws_iam_policy_document.scheduler_assume: Reading...
-module.tls[0].data.aws_cloudfront_origin_request_policy.all_viewer_except_host: Reading...
-module.iam.data.aws_iam_policy_document.lambda_assume: Reading...
-module.tls[0].data.aws_region.current: Reading...
-data.aws_region.current: Reading...
-module.observability.aws_sns_topic.alarms: Refreshing state... [id=arn:aws:sns:us-east-1:010526283195:ticketresolve-dev-alarms]
-module.events_queue.aws_sqs_queue.dlq: Refreshing state... [id=https://sqs.us-east-1.amazonaws.com/010526283195/ticketresolve-dev-events-dlq]
-module.network.data.aws_region.current: Read complete after 0s [id=us-east-1]
-data.aws_region.current: Read complete after 0s [id=us-east-1]
-module.tls[0].data.aws_region.current: Read complete after 0s [id=us-east-1]
-module.iam.data.aws_iam_policy_document.scheduler_assume: Read complete after 0s [id=1905244242]
-module.iam.data.aws_iam_policy_document.lambda_assume: Read complete after 0s [id=666922913]
-module.tls[0].data.aws_cloudfront_cache_policy.disabled: Reading...
-module.iam.aws_iam_openid_connect_provider.github: Refreshing state... [id=arn:aws:iam::010526283195:oidc-provider/token.actions.githubusercontent.com]
-module.ingress.aws_apigatewayv2_api.this: Refreshing state... [id=e60690a9q6]
-module.network.aws_vpc.this: Refreshing state... [id=vpc-0e8b3c272daa5ea0b]
-module.iam.data.aws_iam_policy_document.ci_runner: Reading...
-module.iam.data.aws_iam_policy_document.ci_runner: Read complete after 0s [id=1452180965]
-module.observability.aws_cloudwatch_log_group.lambda["reporte_pdf"]: Refreshing state... [id=/aws/lambda/ticketresolve-reporte-pdf-dev]
-data.aws_caller_identity.current: Read complete after 1s [id=010526283195]
-module.observability.aws_cloudwatch_log_group.lambda["webhook_ingesta"]: Refreshing state... [id=/aws/lambda/ticketresolve-webhook-ingesta-dev]
-module.observability.aws_cloudwatch_log_group.lambda["api_tickets"]: Refreshing state... [id=/aws/lambda/ticketresolve-api-tickets-dev]
-module.observability.aws_cloudwatch_log_group.lambda["escalamiento"]: Refreshing state... [id=/aws/lambda/ticketresolve-escalamiento-dev]
-module.observability.aws_cloudwatch_log_group.lambda["notificacion"]: Refreshing state... [id=/aws/lambda/ticketresolve-notificacion-dev]
-module.tls[0].aws_acm_certificate.this: Refreshing state... [id=arn:aws:acm:us-east-1:010526283195:certificate/ba32e1dd-aa12-49a1-b9a1-f4798d6ae3f2]
-module.iam.aws_iam_role.scheduler: Refreshing state... [id=ticketresolve-dev-scheduler-invoke]
-module.tls[0].data.aws_cloudfront_cache_policy.disabled: Read complete after 1s [id=4135ea2d-6df8-44a3-9df3-4b5a84be39ad]
-module.iam.aws_iam_role.compute_api: Refreshing state... [id=ticketresolve-dev-compute-api]
-module.tls[0].data.aws_cloudfront_origin_request_policy.all_viewer_except_host: Read complete after 1s [id=b689b0a8-53d0-40ab-baf2-68738e2966ac]
-module.iam.aws_iam_role.compute_escalamiento: Refreshing state... [id=ticketresolve-dev-compute-escalamiento]
-module.iam.aws_iam_role.async_consumer: Refreshing state... [id=ticketresolve-dev-async-consumer]
-module.iam.aws_iam_role.compute_reporte: Refreshing state... [id=ticketresolve-dev-compute-reporte]
-module.iam.aws_iam_role.compute_webhook: Refreshing state... [id=ticketresolve-dev-compute-webhook]
-module.iam.aws_iam_policy.ci_runner: Refreshing state... [id=arn:aws:iam::010526283195:policy/ticketresolve-dev-ci-runner]
-module.tls[0].data.aws_route53_zone.this: Read complete after 2s [id=Z015836039GJHA3HG2WTX]
-module.ingress.aws_apigatewayv2_stage.default: Refreshing state... [id=$default]
-module.events_queue.aws_sqs_queue.main: Refreshing state... [id=https://sqs.us-east-1.amazonaws.com/010526283195/ticketresolve-dev-events]
-module.iam.data.aws_iam_policy_document.ci_runner_assume: Reading...
-module.iam.data.aws_iam_policy_document.ci_runner_assume: Read complete after 0s [id=3335666494]
-module.observability.aws_sns_topic_subscription.email: Refreshing state... [id=arn:aws:sns:us-east-1:010526283195:ticketresolve-dev-alarms:483460b9-b329-45a6-a75e-827110604fe1]
-module.observability.aws_cloudwatch_metric_alarm.lambda_errors["api_tickets"]: Refreshing state... [id=ticketresolve-api-tickets-dev-errors]
-module.observability.aws_cloudwatch_metric_alarm.lambda_errors["escalamiento"]: Refreshing state... [id=ticketresolve-escalamiento-dev-errors]
-module.observability.aws_cloudwatch_metric_alarm.lambda_errors["notificacion"]: Refreshing state... [id=ticketresolve-notificacion-dev-errors]
-module.observability.aws_cloudwatch_metric_alarm.lambda_errors["reporte_pdf"]: Refreshing state... [id=ticketresolve-reporte-pdf-dev-errors]
-module.observability.aws_cloudwatch_metric_alarm.lambda_errors["webhook_ingesta"]: Refreshing state... [id=ticketresolve-webhook-ingesta-dev-errors]
-module.observability.data.aws_iam_policy_document.topic_policy: Reading...
-module.observability.data.aws_iam_policy_document.topic_policy: Read complete after 0s [id=1548246720]
-module.tls[0].aws_route53_record.validation["grupo7.oyd.solid.com.gt"]: Refreshing state... [id=Z015836039GJHA3HG2WTX__830662b80750ea7fb60106369d49012a.grupo7.oyd.solid.com.gt._CNAME]
-module.tls[0].aws_route53_record.validation["*.grupo7.oyd.solid.com.gt"]: Refreshing state... [id=Z015836039GJHA3HG2WTX__830662b80750ea7fb60106369d49012a.grupo7.oyd.solid.com.gt._CNAME]
-module.iam.aws_iam_role.ci_runner: Refreshing state... [id=ticketresolve-dev-ci-runner]
-module.events_queue.aws_sqs_queue_redrive_allow_policy.dlq: Refreshing state... [id=https://sqs.us-east-1.amazonaws.com/010526283195/ticketresolve-dev-events-dlq]
-module.observability.aws_sns_topic_policy.alarms: Refreshing state... [id=arn:aws:sns:us-east-1:010526283195:ticketresolve-dev-alarms]
-module.observability.aws_cloudwatch_metric_alarm.apigw_5xx: Refreshing state... [id=ticketresolve-dev-apigw-5xx]
-module.observability.aws_cloudwatch_metric_alarm.dlq_depth: Refreshing state... [id=ticketresolve-dev-dlq-depth]
-module.network.aws_route_table.public: Refreshing state... [id=rtb-0b35bcee5e2a45c66]
-module.network.aws_internet_gateway.this: Refreshing state... [id=igw-08250747704600111]
-module.network.aws_route_table.private_data: Refreshing state... [id=rtb-0cfb7676e02ecc49d]
-module.network.aws_route_table.private_app[0]: Refreshing state... [id=rtb-05ac2cc352f8a244c]
-module.network.aws_route_table.private_app[1]: Refreshing state... [id=rtb-0bc69c9339aed9308]
-module.network.aws_subnet.public[0]: Refreshing state... [id=subnet-0b125e905d68ed851]
-module.network.aws_subnet.public[1]: Refreshing state... [id=subnet-0b2e3800bcffe5c2c]
-module.network.aws_subnet.private_data[0]: Refreshing state... [id=subnet-0aac5bb871fe14f76]
-module.network.aws_subnet.private_data[1]: Refreshing state... [id=subnet-02e62b18788a214af]
-module.network.aws_subnet.private_app[0]: Refreshing state... [id=subnet-04b7227edc9d41f76]
-module.network.aws_subnet.private_app[1]: Refreshing state... [id=subnet-000f1c253c542794c]
-module.iam.data.aws_iam_policy_document.scheduler: Reading...
-module.iam.data.aws_iam_policy_document.scheduler: Read complete after 0s [id=2088875800]
-module.observability.aws_budgets_budget.monthly: Refreshing state... [id=010526283195:ticketresolve-dev-monthly]
-module.observability.aws_cloudwatch_dashboard.main: Refreshing state... [id=ticketresolve-dev-overview]
-module.iam.aws_iam_role_policy_attachment.ci_runner: Refreshing state... [id=ticketresolve-dev-ci-runner-20260622225912200300000001]
-module.tls[0].aws_acm_certificate_validation.this: Refreshing state... [id=2026-06-23 03:24:37.255 +0000 UTC]
-module.network.aws_route.public_internet: Refreshing state... [id=r-rtb-0b35bcee5e2a45c661080289494]
-module.attachments_bucket.aws_s3_bucket.this: Refreshing state... [id=ticketresolve-attachments-dev-010526283195]
-module.security_kms.data.aws_iam_policy_document.cmk: Reading...
-module.security_kms.data.aws_iam_policy_document.cmk: Read complete after 0s [id=1575885962]
-module.iam.aws_iam_policy.scheduler: Refreshing state... [id=arn:aws:iam::010526283195:policy/ticketresolve-dev-scheduler-invoke]
-module.reports_bucket.aws_s3_bucket.this: Refreshing state... [id=ticketresolve-reports-dev-010526283195]
-module.security.aws_security_group.web: Refreshing state... [id=sg-0794af3845e536b7b]
-module.security.aws_security_group.app: Refreshing state... [id=sg-0876a4f1f8669c5aa]
-module.security.aws_security_group.db: Refreshing state... [id=sg-0f459b6967c0567bd]
-module.network.aws_vpc_endpoint.dynamodb: Refreshing state... [id=vpce-07d1bd5cb63a54930]
-module.network.aws_vpc_endpoint.s3: Refreshing state... [id=vpce-004fadc224fd6415b]
-module.network.aws_route_table_association.public[0]: Refreshing state... [id=rtbassoc-0d8f2e81f8a18c79f]
-module.network.aws_route_table_association.public[1]: Refreshing state... [id=rtbassoc-01a9e105f5240cdf0]
-module.security_kms.aws_kms_key.cmk: Refreshing state... [id=8da89dc4-6ad3-445f-8382-fc04637cdd35]
-module.network.aws_route_table_association.private_data[0]: Refreshing state... [id=rtbassoc-04ff4bca14aa65ea0]
-module.network.aws_route_table_association.private_data[1]: Refreshing state... [id=rtbassoc-0774d7466bf442e58]
-module.network.aws_route_table_association.private_app[0]: Refreshing state... [id=rtbassoc-06a1d56bfb48ebb02]
-module.network.aws_route_table_association.private_app[1]: Refreshing state... [id=rtbassoc-09e208569e91232cd]
-module.tls[0].aws_apigatewayv2_domain_name.api: Refreshing state... [id=api.grupo7.oyd.solid.com.gt]
-module.security.aws_vpc_security_group_ingress_rule.web_https["0.0.0.0/0"]: Refreshing state... [id=sgr-00379906985d9e41b]
-module.security.aws_vpc_security_group_ingress_rule.web_http["0.0.0.0/0"]: Refreshing state... [id=sgr-0b951e798b30d79d0]
-module.security.aws_vpc_security_group_egress_rule.web_to_app: Refreshing state... [id=sgr-05c4921c5da296134]
-module.security.aws_vpc_security_group_ingress_rule.app_from_web: Refreshing state... [id=sgr-07d8780cdb0269b75]
-module.security.aws_vpc_security_group_ingress_rule.db_from_app: Refreshing state... [id=sgr-09622a98fe09bada0]
-module.security.aws_vpc_security_group_egress_rule.app_to_db: Refreshing state... [id=sgr-032b4c72a502a04a5]
-module.iam.aws_iam_role_policy_attachment.scheduler: Refreshing state... [id=ticketresolve-dev-scheduler-invoke-20260622230143544600000001]
-module.security.aws_network_acl.public: Refreshing state... [id=acl-00890e304e1ed5141]
-module.tls[0].aws_route53_record.api: Refreshing state... [id=Z015836039GJHA3HG2WTX_api.grupo7.oyd.solid.com.gt_A]
-module.tls[0].aws_apigatewayv2_api_mapping.api: Refreshing state... [id=bdbii5]
-module.security.aws_network_acl.private: Refreshing state... [id=acl-019cb440de5585796]
-module.security.aws_network_acl_rule.public_out_https: Refreshing state... [id=nacl-2522445884]
-module.security.aws_network_acl_rule.public_out_ephemeral: Refreshing state... [id=nacl-3787958988]
-module.security.aws_network_acl_rule.public_in_ephemeral: Refreshing state... [id=nacl-3736150769]
-module.security.aws_network_acl_rule.public_out_http: Refreshing state... [id=nacl-234632275]
-module.security.aws_network_acl_rule.public_in_https: Refreshing state... [id=nacl-1669025343]
-module.security.aws_network_acl_rule.public_in_http: Refreshing state... [id=nacl-3203241914]
-module.security_kms.aws_secretsmanager_secret.db_password: Refreshing state... [id=arn:aws:secretsmanager:us-east-1:010526283195:secret:ticketresolve-dev-db-password-dHnYk0]
-module.security_kms.aws_kms_alias.cmk: Refreshing state... [id=alias/ticketresolve-dev]
-module.security.aws_network_acl_rule.private_out_vpc: Refreshing state... [id=nacl-3691053869]
-module.security.aws_network_acl_rule.private_in_vpc: Refreshing state... [id=nacl-517840619]
-module.security.aws_network_acl_rule.private_out_https: Refreshing state... [id=nacl-2673031950]
-module.security.aws_network_acl_rule.private_in_ephemeral: Refreshing state... [id=nacl-2879723004]
-module.security.aws_network_acl_rule.private_out_ephemeral: Refreshing state... [id=nacl-3905808894]
-module.tls[0].aws_cloudfront_distribution.this: Refreshing state... [id=E2YN0IRBPWXM1A]
-module.database.aws_dynamodb_table.this: Refreshing state... [id=ticketresolve-dev]
-module.security_kms.aws_secretsmanager_secret_version.db_password: Refreshing state... [id=arn:aws:secretsmanager:us-east-1:010526283195:secret:ticketresolve-dev-db-password-dHnYk0|terraform-2026062222592735340000000b]
-module.tls[0].aws_route53_record.app: Refreshing state... [id=Z015836039GJHA3HG2WTX_app.grupo7.oyd.solid.com.gt_A]
-module.reports_bucket.aws_s3_bucket_public_access_block.this: Refreshing state... [id=ticketresolve-reports-dev-010526283195]
-module.reports_bucket.aws_s3_bucket_versioning.this: Refreshing state... [id=ticketresolve-reports-dev-010526283195]
-module.reports_bucket.aws_s3_bucket_server_side_encryption_configuration.this: Refreshing state... [id=ticketresolve-reports-dev-010526283195]
-module.reports_bucket.data.aws_iam_policy_document.ssl_only: Reading...
-module.reports_bucket.data.aws_iam_policy_document.ssl_only: Read complete after 0s [id=2067957044]
-module.reports_bucket.aws_s3_bucket_policy.ssl_only: Refreshing state... [id=ticketresolve-reports-dev-010526283195]
-module.attachments_bucket.aws_s3_bucket_versioning.this: Refreshing state... [id=ticketresolve-attachments-dev-010526283195]
-module.attachments_bucket.aws_s3_bucket_server_side_encryption_configuration.this: Refreshing state... [id=ticketresolve-attachments-dev-010526283195]
-module.attachments_bucket.aws_s3_bucket_public_access_block.this: Refreshing state... [id=ticketresolve-attachments-dev-010526283195]
-module.attachments_bucket.data.aws_iam_policy_document.ssl_only: Reading...
-module.attachments_bucket.data.aws_iam_policy_document.ssl_only: Read complete after 0s [id=3503044543]
-module.lambda_notificacion.aws_lambda_function.this: Refreshing state... [id=ticketresolve-notificacion-dev]
-module.iam.data.aws_iam_policy_document.async_consumer: Reading...
-module.iam.data.aws_iam_policy_document.async_consumer: Read complete after 0s [id=1761944962]
-module.attachments_bucket.aws_s3_bucket_policy.ssl_only: Refreshing state... [id=ticketresolve-attachments-dev-010526283195]
-module.iam.aws_iam_policy.async_consumer: Refreshing state... [id=arn:aws:iam::010526283195:policy/ticketresolve-dev-async-consumer]
-aws_dynamodb_table_item.seed_ticket: Refreshing state... [id=ticketresolve-dev|PK|TICKET#seed|META]
-module.lambda_reporte_pdf.aws_lambda_function.this: Refreshing state... [id=ticketresolve-reporte-pdf-dev]
-module.lambda_webhook_ingesta.aws_lambda_function.this: Refreshing state... [id=ticketresolve-webhook-ingesta-dev]
-module.lambda_api_tickets.aws_lambda_function.this: Refreshing state... [id=ticketresolve-api-tickets-dev]
-module.lambda_escalamiento.aws_lambda_function.this: Refreshing state... [id=ticketresolve-escalamiento-dev]
-module.iam.data.aws_iam_policy_document.compute_webhook: Reading...
-module.iam.data.aws_iam_policy_document.compute_webhook: Read complete after 0s [id=2083937336]
-module.iam.data.aws_iam_policy_document.compute_escalamiento: Reading...
-module.iam.data.aws_iam_policy_document.compute_escalamiento: Read complete after 0s [id=4267495743]
-module.iam.data.aws_iam_policy_document.compute_api: Reading...
-module.iam.data.aws_iam_policy_document.compute_reporte: Reading...
-module.iam.data.aws_iam_policy_document.compute_reporte: Read complete after 0s [id=1301411908]
-module.iam.data.aws_iam_policy_document.compute_api: Read complete after 0s [id=3423798464]
-module.iam.aws_iam_role_policy_attachment.async_consumer: Refreshing state... [id=ticketresolve-dev-async-consumer-20260622230002897600000010]
-module.iam.aws_iam_policy.compute_webhook: Refreshing state... [id=arn:aws:iam::010526283195:policy/ticketresolve-dev-compute-webhook]
-module.iam.aws_iam_policy.compute_escalamiento: Refreshing state... [id=arn:aws:iam::010526283195:policy/ticketresolve-dev-compute-escalamiento]
-module.iam.aws_iam_policy.compute_reporte: Refreshing state... [id=arn:aws:iam::010526283195:policy/ticketresolve-dev-compute-reporte]
-module.iam.aws_iam_role_policy_attachment.compute_webhook: Refreshing state... [id=ticketresolve-dev-compute-webhook-2026062222595572020000000c]
-module.iam.aws_iam_policy.compute_api: Refreshing state... [id=arn:aws:iam::010526283195:policy/ticketresolve-dev-compute-api]
-aws_lambda_event_source_mapping.events_to_notificacion: Refreshing state... [id=3d59bf69-c385-429f-8ccd-13a5884c73a5]
-module.sla_sweep_scheduler.aws_scheduler_schedule.this: Refreshing state... [id=default/ticketresolve-dev-sla-sweep]
-module.iam.aws_iam_role_policy_attachment.compute_escalamiento: Refreshing state... [id=ticketresolve-dev-compute-escalamiento-2026062222595576780000000d]
-module.ingress.aws_lambda_permission.webhook: Refreshing state... [id=AllowAPIGatewayInvokeWebhookIngesta]
-module.ingress.aws_apigatewayv2_integration.webhook: Refreshing state... [id=3nf03fv]
-module.iam.aws_iam_role_policy_attachment.compute_reporte: Refreshing state... [id=ticketresolve-dev-compute-reporte-2026062222595579270000000e]
-module.ingress.aws_lambda_permission.api_tickets: Refreshing state... [id=AllowAPIGatewayInvokeApiTickets]
-module.ingress.aws_apigatewayv2_integration.api_tickets: Refreshing state... [id=r9pnhkn]
-module.ingress.aws_apigatewayv2_route.webhooks_post: Refreshing state... [id=83x3lq7]
-module.iam.aws_iam_role_policy_attachment.compute_api: Refreshing state... [id=ticketresolve-dev-compute-api-2026062223000263750000000f]
-module.ingress.aws_apigatewayv2_route.incidents_post: Refreshing state... [id=be3cnho]
-module.ingress.aws_apigatewayv2_route.health: Refreshing state... [id=a8f3he8]
-module.ingress.aws_apigatewayv2_route.incidents_get: Refreshing state... [id=n9za8g6]
-module.ingress.aws_apigatewayv2_route.incidents_enqueue_post: Refreshing state... [id=obzgha8]
-module.reports_bucket.aws_s3_bucket_lifecycle_configuration.this: Refreshing state... [id=ticketresolve-reports-dev-010526283195]
-module.attachments_bucket.aws_s3_bucket_lifecycle_configuration.this: Refreshing state... [id=ticketresolve-attachments-dev-010526283195]
+Acquiring state lock. This may take a few moments...
+[0m[1mmodule.lambda_notificacion.data.archive_file.from_source[0]: Reading...[0m[0m
+[0m[1mmodule.lambda_api_tickets.data.archive_file.from_source[0]: Reading...[0m[0m
+[0m[1mmodule.lambda_escalamiento.data.archive_file.placeholder[0]: Reading...[0m[0m
+[0m[1mmodule.lambda_webhook_ingesta.data.archive_file.placeholder[0]: Reading...[0m[0m
+[0m[1mmodule.lambda_reporte_pdf.data.archive_file.placeholder[0]: Reading...[0m[0m
+[0m[1mmodule.lambda_reporte_pdf.data.archive_file.placeholder[0]: Read complete after 0s [id=c068d0ecf86332931bcd0a400f99ff4423b6346f][0m
+[0m[1mmodule.lambda_escalamiento.data.archive_file.placeholder[0]: Read complete after 0s [id=8439f7904db11e1f17585423b3ee173cf01a916a][0m
+[0m[1mmodule.lambda_notificacion.data.archive_file.from_source[0]: Read complete after 0s [id=91931f62b320edb677cfc4ee3c1c42bf28124fb9][0m
+[0m[1mmodule.lambda_webhook_ingesta.data.archive_file.placeholder[0]: Read complete after 0s [id=da4d798a93ca7521f1c13b240b81b63fdab0994b][0m
+[0m[1mmodule.lambda_api_tickets.data.archive_file.from_source[0]: Read complete after 0s [id=90a48496bfc8d97e0d1d6941cef45157c752beec][0m
+[0m[1mmodule.tls[0].data.aws_cloudfront_cache_policy.disabled: Reading...[0m[0m
+[0m[1mmodule.iam.data.aws_iam_policy_document.scheduler_assume: Reading...[0m[0m
+[0m[1mmodule.iam.data.aws_iam_policy_document.lambda_assume: Reading...[0m[0m
+[0m[1mdata.aws_caller_identity.current: Reading...[0m[0m
+[0m[1mdata.aws_region.current: Reading...[0m[0m
+[0m[1mmodule.network.data.aws_region.current: Reading...[0m[0m
+[0m[1mmodule.network.aws_vpc.this: Refreshing state... [id=vpc-0cd4adb3f273f8811][0m
+[0m[1mmodule.observability.aws_cloudwatch_log_group.lambda["webhook_ingesta"]: Refreshing state... [id=/aws/lambda/ticketresolve-webhook-ingesta-dev][0m
+[0m[1mmodule.observability.aws_cloudwatch_log_group.lambda["api_tickets"]: Refreshing state... [id=/aws/lambda/ticketresolve-api-tickets-dev][0m
+[0m[1mmodule.observability.aws_sns_topic.alarms: Refreshing state... [id=arn:aws:sns:us-east-1:010526283195:ticketresolve-dev-alarms][0m
+[0m[1mmodule.iam.data.aws_iam_policy_document.lambda_assume: Read complete after 0s [id=666922913][0m
+[0m[1mmodule.iam.data.aws_iam_policy_document.scheduler_assume: Read complete after 0s [id=1905244242][0m
+[0m[1mmodule.network.data.aws_region.current: Read complete after 0s [id=us-east-1][0m
+[0m[1mdata.aws_region.current: Read complete after 0s [id=us-east-1][0m
+[0m[1mmodule.observability.aws_cloudwatch_log_group.lambda["notificacion"]: Refreshing state... [id=/aws/lambda/ticketresolve-notificacion-dev][0m
+[0m[1mmodule.observability.aws_cloudwatch_log_group.lambda["escalamiento"]: Refreshing state... [id=/aws/lambda/ticketresolve-escalamiento-dev][0m
+[0m[1mmodule.observability.aws_cloudwatch_log_group.lambda["reporte_pdf"]: Refreshing state... [id=/aws/lambda/ticketresolve-reporte-pdf-dev][0m
+[0m[1mmodule.events_queue.aws_sqs_queue.dlq: Refreshing state... [id=https://sqs.us-east-1.amazonaws.com/010526283195/ticketresolve-dev-events-dlq][0m
+[0m[1mdata.aws_caller_identity.current: Read complete after 0s [id=010526283195][0m
+[0m[1mmodule.ingress.aws_apigatewayv2_api.this: Refreshing state... [id=otgwvx2lz0][0m
+[0m[1mmodule.tls[0].data.aws_region.current: Reading...[0m[0m
+[0m[1mmodule.tls[0].data.aws_region.current: Read complete after 0s [id=us-east-1][0m
+[0m[1mmodule.tls[0].data.aws_route53_zone.this: Reading...[0m[0m
+[0m[1mmodule.tls[0].data.aws_cloudfront_origin_request_policy.all_viewer_except_host: Reading...[0m[0m
+[0m[1mmodule.iam.aws_iam_role.compute_escalamiento: Refreshing state... [id=ticketresolve-dev-compute-escalamiento][0m
+[0m[1mmodule.iam.aws_iam_role.compute_api: Refreshing state... [id=ticketresolve-dev-compute-api][0m
+[0m[1mmodule.iam.aws_iam_role.async_consumer: Refreshing state... [id=ticketresolve-dev-async-consumer][0m
+[0m[1mmodule.iam.aws_iam_role.compute_reporte: Refreshing state... [id=ticketresolve-dev-compute-reporte][0m
+[0m[1mmodule.iam.aws_iam_role.compute_webhook: Refreshing state... [id=ticketresolve-dev-compute-webhook][0m
+[0m[1mmodule.iam.aws_iam_role.scheduler: Refreshing state... [id=ticketresolve-dev-scheduler-invoke][0m
+[0m[1mmodule.tls[0].data.aws_cloudfront_cache_policy.disabled: Read complete after 1s [id=4135ea2d-6df8-44a3-9df3-4b5a84be39ad][0m
+[0m[1mmodule.ingress.aws_apigatewayv2_stage.default: Refreshing state... [id=$default][0m
+[0m[1mmodule.tls[0].data.aws_cloudfront_origin_request_policy.all_viewer_except_host: Read complete after 1s [id=b689b0a8-53d0-40ab-baf2-68738e2966ac][0m
+[0m[1mmodule.tls[0].aws_acm_certificate.this: Refreshing state... [id=arn:aws:acm:us-east-1:010526283195:certificate/34ef4172-a9dc-40e5-9d2e-73c6f33d6330][0m
+[0m[1mmodule.events_queue.aws_sqs_queue.main: Refreshing state... [id=https://sqs.us-east-1.amazonaws.com/010526283195/ticketresolve-dev-events][0m
+[0m[1mmodule.observability.aws_sns_topic_subscription.email: Refreshing state... [id=arn:aws:sns:us-east-1:010526283195:ticketresolve-dev-alarms:4b6e0368-0a11-494a-ab85-19152616253c][0m
+[0m[1mmodule.observability.data.aws_iam_policy_document.topic_policy: Reading...[0m[0m
+[0m[1mmodule.observability.data.aws_iam_policy_document.topic_policy: Read complete after 0s [id=1548246720][0m
+[0m[1mmodule.observability.aws_cloudwatch_metric_alarm.lambda_errors["escalamiento"]: Refreshing state... [id=ticketresolve-escalamiento-dev-errors][0m
+[0m[1mmodule.observability.aws_cloudwatch_metric_alarm.lambda_errors["reporte_pdf"]: Refreshing state... [id=ticketresolve-reporte-pdf-dev-errors][0m
+[0m[1mmodule.observability.aws_cloudwatch_metric_alarm.lambda_errors["api_tickets"]: Refreshing state... [id=ticketresolve-api-tickets-dev-errors][0m
+[0m[1mmodule.observability.aws_cloudwatch_metric_alarm.lambda_errors["notificacion"]: Refreshing state... [id=ticketresolve-notificacion-dev-errors][0m
+[0m[1mmodule.tls[0].data.aws_route53_zone.this: Read complete after 1s [id=Z015836039GJHA3HG2WTX][0m
+[0m[1mmodule.observability.aws_cloudwatch_metric_alarm.lambda_errors["webhook_ingesta"]: Refreshing state... [id=ticketresolve-webhook-ingesta-dev-errors][0m
+[0m[1mmodule.observability.aws_sns_topic_policy.alarms: Refreshing state... [id=arn:aws:sns:us-east-1:010526283195:ticketresolve-dev-alarms][0m
+[0m[1mmodule.observability.aws_cloudwatch_metric_alarm.apigw_5xx: Refreshing state... [id=ticketresolve-dev-apigw-5xx][0m
+[0m[1mmodule.observability.aws_cloudwatch_metric_alarm.dlq_depth: Refreshing state... [id=ticketresolve-dev-dlq-depth][0m
+[0m[1mmodule.iam.data.aws_iam_policy_document.scheduler: Reading...[0m[0m
+[0m[1mmodule.iam.data.aws_iam_policy_document.scheduler: Read complete after 0s [id=2088875800][0m
+[0m[1mmodule.events_queue.aws_sqs_queue_redrive_allow_policy.dlq: Refreshing state... [id=https://sqs.us-east-1.amazonaws.com/010526283195/ticketresolve-dev-events-dlq][0m
+[0m[1mmodule.tls[0].aws_route53_record.validation["grupo7.oyd.solid.com.gt"]: Refreshing state... [id=Z015836039GJHA3HG2WTX__830662b80750ea7fb60106369d49012a.grupo7.oyd.solid.com.gt._CNAME][0m
+[0m[1mmodule.tls[0].aws_route53_record.validation["*.grupo7.oyd.solid.com.gt"]: Refreshing state... [id=Z015836039GJHA3HG2WTX__830662b80750ea7fb60106369d49012a.grupo7.oyd.solid.com.gt._CNAME][0m
+[0m[1mmodule.iam.aws_iam_policy.scheduler: Refreshing state... [id=arn:aws:iam::010526283195:policy/ticketresolve-dev-scheduler-invoke][0m
+[0m[1mmodule.security_kms.data.aws_iam_policy_document.cmk: Reading...[0m[0m
+[0m[1mmodule.security_kms.data.aws_iam_policy_document.cmk: Read complete after 0s [id=473657209][0m
+[0m[1mmodule.attachments_bucket.aws_s3_bucket.this: Refreshing state... [id=ticketresolve-attachments-dev-010526283195][0m
+[0m[1mmodule.reports_bucket.aws_s3_bucket.this: Refreshing state... [id=ticketresolve-reports-dev-010526283195][0m
+[0m[1mmodule.observability.aws_budgets_budget.monthly: Refreshing state... [id=010526283195:ticketresolve-dev-monthly][0m
+[0m[1mmodule.network.aws_route_table.public: Refreshing state... [id=rtb-0d99af131e0630612][0m
+[0m[1mmodule.network.aws_route_table.private_data: Refreshing state... [id=rtb-0e02330da25e410ae][0m
+[0m[1mmodule.network.aws_internet_gateway.this: Refreshing state... [id=igw-01ceef1e32d26fa5f][0m
+[0m[1mmodule.network.aws_route_table.private_app[1]: Refreshing state... [id=rtb-04cb170132539edbd][0m
+[0m[1mmodule.network.aws_route_table.private_app[0]: Refreshing state... [id=rtb-0ac8c83ba4506a11c][0m
+[0m[1mmodule.network.aws_subnet.public[0]: Refreshing state... [id=subnet-0ac58d613906e10e7][0m
+[0m[1mmodule.network.aws_subnet.public[1]: Refreshing state... [id=subnet-0d58606cef05ed017][0m
+[0m[1mmodule.network.aws_subnet.private_app[0]: Refreshing state... [id=subnet-04413dd87b07b9550][0m
+[0m[1mmodule.network.aws_subnet.private_app[1]: Refreshing state... [id=subnet-07a07317f5cec11c2][0m
+[0m[1mmodule.network.aws_subnet.private_data[0]: Refreshing state... [id=subnet-0deb39983d8a661a9][0m
+[0m[1mmodule.iam.aws_iam_role_policy_attachment.scheduler: Refreshing state... [id=ticketresolve-dev-scheduler-invoke-20260623043658508000000002][0m
+[0m[1mmodule.network.aws_subnet.private_data[1]: Refreshing state... [id=subnet-0a17a8c5472865a92][0m
+[0m[1mmodule.security_kms.aws_kms_key.cmk: Refreshing state... [id=798e1072-8168-44fd-aca8-7270a51c4417][0m
+[0m[1mmodule.observability.aws_cloudwatch_dashboard.main: Refreshing state... [id=ticketresolve-dev-overview][0m
+[0m[1mmodule.tls[0].aws_acm_certificate_validation.this: Refreshing state... [id=2026-06-23 04:37:14.026 +0000 UTC][0m
+[0m[1mmodule.network.aws_route.public_internet: Refreshing state... [id=r-rtb-0d99af131e06306121080289494][0m
+[0m[1mmodule.network.aws_vpc_endpoint.s3: Refreshing state... [id=vpce-055776431ce9420a4][0m
+[0m[1mmodule.network.aws_vpc_endpoint.dynamodb: Refreshing state... [id=vpce-0c505d9e3bdfe5908][0m
+[0m[1mmodule.network.aws_route_table_association.public[0]: Refreshing state... [id=rtbassoc-0dce9d7f2a9fdd32a][0m
+[0m[1mmodule.network.aws_route_table_association.public[1]: Refreshing state... [id=rtbassoc-0c271d16a5366650d][0m
+[0m[1mmodule.security.aws_security_group.web: Refreshing state... [id=sg-03b34b9d84c8d87f9][0m
+[0m[1mmodule.security.aws_security_group.db: Refreshing state... [id=sg-094bca66c6d2a23a8][0m
+[0m[1mmodule.security.aws_security_group.app: Refreshing state... [id=sg-0f0ec657fd598cde6][0m
+[0m[1mmodule.network.aws_route_table_association.private_app[1]: Refreshing state... [id=rtbassoc-0dd0e56df1b038796][0m
+[0m[1mmodule.network.aws_route_table_association.private_app[0]: Refreshing state... [id=rtbassoc-0efa877ce274db996][0m
+[0m[1mmodule.network.aws_route_table_association.private_data[1]: Refreshing state... [id=rtbassoc-0cda8cf393e05c207][0m
+[0m[1mmodule.network.aws_route_table_association.private_data[0]: Refreshing state... [id=rtbassoc-0081e887686e7b8bf][0m
+[0m[1mmodule.tls[0].aws_apigatewayv2_domain_name.api: Refreshing state... [id=api.grupo7.oyd.solid.com.gt][0m
+[0m[1mmodule.security.aws_vpc_security_group_ingress_rule.web_https["0.0.0.0/0"]: Refreshing state... [id=sgr-0dd460f2fd833359b][0m
+[0m[1mmodule.security.aws_vpc_security_group_ingress_rule.web_http["0.0.0.0/0"]: Refreshing state... [id=sgr-05c27ec1619a9c60d][0m
+[0m[1mmodule.security.aws_network_acl.public: Refreshing state... [id=acl-0d44f9f3a1c5bd2c0][0m
+[0m[1mmodule.security.aws_vpc_security_group_ingress_rule.app_from_web: Refreshing state... [id=sgr-09f8413a4c6ddc695][0m
+[0m[1mmodule.security.aws_vpc_security_group_egress_rule.web_to_app: Refreshing state... [id=sgr-084e8c357dd11419b][0m
+[0m[1mmodule.security.aws_vpc_security_group_egress_rule.app_to_db: Refreshing state... [id=sgr-05069a63f93602a3a][0m
+[0m[1mmodule.security.aws_vpc_security_group_ingress_rule.db_from_app: Refreshing state... [id=sgr-0bcaceac6f7f12dcb][0m
+[0m[1mmodule.security.aws_network_acl.private: Refreshing state... [id=acl-0d17e1e674a1b1b77][0m
+[0m[1mmodule.tls[0].aws_route53_record.api: Refreshing state... [id=Z015836039GJHA3HG2WTX_api.grupo7.oyd.solid.com.gt_A][0m
+[0m[1mmodule.tls[0].aws_apigatewayv2_api_mapping.api: Refreshing state... [id=f06q3y][0m
+[0m[1mmodule.security_kms.aws_kms_alias.cmk: Refreshing state... [id=alias/ticketresolve-dev][0m
+[0m[1mmodule.security_kms.aws_secretsmanager_secret.db_password: Refreshing state... [id=arn:aws:secretsmanager:us-east-1:010526283195:secret:ticketresolve-dev-db-password-DkUg4f][0m
+[0m[1mmodule.security.aws_network_acl_rule.public_out_https: Refreshing state... [id=nacl-1596995400][0m
+[0m[1mmodule.security.aws_network_acl_rule.public_in_ephemeral: Refreshing state... [id=nacl-2299592347][0m
+[0m[1mmodule.security.aws_network_acl_rule.public_in_http: Refreshing state... [id=nacl-3914091472][0m
+[0m[1mmodule.security.aws_network_acl_rule.public_out_http: Refreshing state... [id=nacl-3298130727][0m
+[0m[1mmodule.security.aws_network_acl_rule.public_out_ephemeral: Refreshing state... [id=nacl-682550712][0m
+[0m[1mmodule.security.aws_network_acl_rule.public_in_https: Refreshing state... [id=nacl-886739541][0m
+[0m[1mmodule.security.aws_network_acl_rule.private_out_vpc: Refreshing state... [id=nacl-83848293][0m
+[0m[1mmodule.security.aws_network_acl_rule.private_in_ephemeral: Refreshing state... [id=nacl-1309177030][0m
+[0m[1mmodule.security.aws_network_acl_rule.private_out_ephemeral: Refreshing state... [id=nacl-2417155635][0m
+[0m[1mmodule.security.aws_network_acl_rule.private_in_vpc: Refreshing state... [id=nacl-1711450406][0m
+[0m[1mmodule.security.aws_network_acl_rule.private_out_https: Refreshing state... [id=nacl-3884715203][0m
+[0m[1mmodule.database.aws_dynamodb_table.this: Refreshing state... [id=ticketresolve-dev][0m
+[0m[1mmodule.tls[0].aws_cloudfront_distribution.this: Refreshing state... [id=E1SD2TB5Q30P6C][0m
+[0m[1mmodule.security_kms.aws_secretsmanager_secret_version.db_password: Refreshing state... [id=arn:aws:secretsmanager:us-east-1:010526283195:secret:ticketresolve-dev-db-password-DkUg4f|terraform-2026062304371476580000000b][0m
+[0m[1mmodule.reports_bucket.aws_s3_bucket_public_access_block.this: Refreshing state... [id=ticketresolve-reports-dev-010526283195][0m
+[0m[1mmodule.reports_bucket.data.aws_iam_policy_document.ssl_only: Reading...[0m[0m
+[0m[1mmodule.reports_bucket.data.aws_iam_policy_document.ssl_only: Read complete after 0s [id=2067957044][0m
+[0m[1mmodule.reports_bucket.aws_s3_bucket_versioning.this: Refreshing state... [id=ticketresolve-reports-dev-010526283195][0m
+[0m[1mmodule.reports_bucket.aws_s3_bucket_server_side_encryption_configuration.this: Refreshing state... [id=ticketresolve-reports-dev-010526283195][0m
+[0m[1mmodule.reports_bucket.aws_s3_bucket_policy.ssl_only: Refreshing state... [id=ticketresolve-reports-dev-010526283195][0m
+[0m[1mmodule.tls[0].aws_route53_record.app: Refreshing state... [id=Z015836039GJHA3HG2WTX_app.grupo7.oyd.solid.com.gt_A][0m
+[0m[1mmodule.attachments_bucket.aws_s3_bucket_public_access_block.this: Refreshing state... [id=ticketresolve-attachments-dev-010526283195][0m
+[0m[1mmodule.attachments_bucket.aws_s3_bucket_server_side_encryption_configuration.this: Refreshing state... [id=ticketresolve-attachments-dev-010526283195][0m
+[0m[1mmodule.attachments_bucket.aws_s3_bucket_versioning.this: Refreshing state... [id=ticketresolve-attachments-dev-010526283195][0m
+[0m[1mmodule.attachments_bucket.data.aws_iam_policy_document.ssl_only: Reading...[0m[0m
+[0m[1mmodule.iam.data.aws_iam_policy_document.async_consumer: Reading...[0m[0m
+[0m[1mmodule.lambda_notificacion.aws_lambda_function.this: Refreshing state... [id=ticketresolve-notificacion-dev][0m
+[0m[1mmodule.attachments_bucket.data.aws_iam_policy_document.ssl_only: Read complete after 0s [id=3503044543][0m
+[0m[1mmodule.attachments_bucket.aws_s3_bucket_policy.ssl_only: Refreshing state... [id=ticketresolve-attachments-dev-010526283195][0m
+[0m[1mmodule.iam.data.aws_iam_policy_document.async_consumer: Read complete after 0s [id=148046691][0m
+[0m[1mmodule.iam.aws_iam_policy.async_consumer: Refreshing state... [id=arn:aws:iam::010526283195:policy/ticketresolve-dev-async-consumer][0m
+[0m[1mmodule.iam.aws_iam_role_policy_attachment.async_consumer: Refreshing state... [id=ticketresolve-dev-async-consumer-20260623043748387900000010][0m
+[0m[1maws_dynamodb_table_item.seed_ticket: Refreshing state... [id=ticketresolve-dev|PK|TICKET#seed|META][0m
+[0m[1mmodule.iam.data.aws_iam_policy_document.compute_escalamiento: Reading...[0m[0m
+[0m[1mmodule.iam.data.aws_iam_policy_document.compute_reporte: Reading...[0m[0m
+[0m[1mmodule.lambda_escalamiento.aws_lambda_function.this: Refreshing state... [id=ticketresolve-escalamiento-dev][0m
+[0m[1mmodule.lambda_webhook_ingesta.aws_lambda_function.this: Refreshing state... [id=ticketresolve-webhook-ingesta-dev][0m
+[0m[1mmodule.iam.data.aws_iam_policy_document.compute_escalamiento: Read complete after 0s [id=4267495743][0m
+[0m[1mmodule.lambda_reporte_pdf.aws_lambda_function.this: Refreshing state... [id=ticketresolve-reporte-pdf-dev][0m
+[0m[1mmodule.iam.data.aws_iam_policy_document.compute_reporte: Read complete after 0s [id=2570977189][0m
+[0m[1mmodule.iam.data.aws_iam_policy_document.compute_webhook: Reading...[0m[0m
+[0m[1mmodule.iam.data.aws_iam_policy_document.compute_api: Reading...[0m[0m
+[0m[1mmodule.iam.data.aws_iam_policy_document.compute_webhook: Read complete after 0s [id=2083937336][0m
+[0m[1mmodule.iam.data.aws_iam_policy_document.compute_api: Read complete after 0s [id=415171361][0m
+[0m[1mmodule.lambda_api_tickets.aws_lambda_function.this: Refreshing state... [id=ticketresolve-api-tickets-dev][0m
+[0m[1mmodule.iam.aws_iam_policy.compute_escalamiento: Refreshing state... [id=arn:aws:iam::010526283195:policy/ticketresolve-dev-compute-escalamiento][0m
+[0m[1mmodule.iam.aws_iam_policy.compute_reporte: Refreshing state... [id=arn:aws:iam::010526283195:policy/ticketresolve-dev-compute-reporte][0m
+[0m[1mmodule.iam.aws_iam_policy.compute_webhook: Refreshing state... [id=arn:aws:iam::010526283195:policy/ticketresolve-dev-compute-webhook][0m
+[0m[1mmodule.iam.aws_iam_policy.compute_api: Refreshing state... [id=arn:aws:iam::010526283195:policy/ticketresolve-dev-compute-api][0m
+[0m[1mmodule.reports_bucket.aws_s3_bucket_lifecycle_configuration.this: Refreshing state... [id=ticketresolve-reports-dev-010526283195][0m
+[0m[1mmodule.iam.aws_iam_role_policy_attachment.compute_escalamiento: Refreshing state... [id=ticketresolve-dev-compute-escalamiento-2026062304373896550000000f][0m
+[0m[1maws_lambda_event_source_mapping.events_to_notificacion: Refreshing state... [id=fffc30e7-1893-41cd-aca4-7e1d1a64c410][0m
+[0m[1mmodule.iam.aws_iam_role_policy_attachment.compute_reporte: Refreshing state... [id=ticketresolve-dev-compute-reporte-2026062304373891610000000e][0m
+[0m[1mmodule.iam.aws_iam_role_policy_attachment.compute_webhook: Refreshing state... [id=ticketresolve-dev-compute-webhook-2026062304373891550000000d][0m
+[0m[1mmodule.iam.aws_iam_role_policy_attachment.compute_api: Refreshing state... [id=ticketresolve-dev-compute-api-20260623043748520100000011][0m
+[0m[1mmodule.ingress.aws_lambda_permission.webhook: Refreshing state... [id=AllowAPIGatewayInvokeWebhookIngesta][0m
+[0m[1mmodule.ingress.aws_apigatewayv2_integration.webhook: Refreshing state... [id=1ue54g0][0m
+[0m[1mmodule.ingress.aws_apigatewayv2_integration.api_tickets: Refreshing state... [id=a20urqd][0m
+[0m[1mmodule.ingress.aws_lambda_permission.api_tickets: Refreshing state... [id=AllowAPIGatewayInvokeApiTickets][0m
+[0m[1mmodule.sla_sweep_scheduler.aws_scheduler_schedule.this: Refreshing state... [id=default/ticketresolve-dev-sla-sweep][0m
+[0m[1mmodule.ingress.aws_apigatewayv2_route.incidents_post: Refreshing state... [id=9961g1a][0m
+[0m[1mmodule.ingress.aws_apigatewayv2_route.incidents_get: Refreshing state... [id=xkbpmlg][0m
+[0m[1mmodule.ingress.aws_apigatewayv2_route.incidents_enqueue_post: Refreshing state... [id=cbt81g5][0m
+[0m[1mmodule.ingress.aws_apigatewayv2_route.health: Refreshing state... [id=l866trf][0m
+[0m[1mmodule.ingress.aws_apigatewayv2_route.webhooks_post: Refreshing state... [id=v4jj4c5][0m
+[0m[1mmodule.attachments_bucket.aws_s3_bucket_lifecycle_configuration.this: Refreshing state... [id=ticketresolve-attachments-dev-010526283195][0m
 
-No changes. Your infrastructure matches the configuration.
+[0m[1m[32mNo changes.[0m[1m Your infrastructure matches the configuration.[0m
 
-Terraform has compared your real infrastructure against your configuration
+[0mTerraform has compared your real infrastructure against your configuration
 and found no differences, so no changes are needed.
