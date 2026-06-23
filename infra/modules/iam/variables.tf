@@ -85,40 +85,9 @@ variable "reporte_function_name" {
   type        = string
 }
 
-# --- OIDC / CI runner --------------------------------------------------------
-variable "github_repo" {
-  description = "GitHub repository in <org>/<repo> form. The CI runner trust policy is scoped to this repository's subject claims so no other repo (or a fork's PR) can assume the role."
-  type        = string
-  default     = "PabloP150/TicketResolve"
-}
-
-variable "oidc_audience" {
-  description = "Audience claim required on the GitHub OIDC token. AWS STS expects sts.amazonaws.com."
-  type        = string
-  default     = "sts.amazonaws.com"
-}
-
-variable "oidc_provider_url" {
-  description = "Issuer URL of the GitHub Actions OIDC provider (without scheme in some contexts; the full https URL here)."
-  type        = string
-  default     = "https://token.actions.githubusercontent.com"
-}
-
-variable "github_oidc_thumbprints" {
-  description = "TLS thumbprints of the GitHub OIDC issuer. AWS validates token.actions.githubusercontent.com against its own trust store, but the provider resource still requires a thumbprint list."
-  type        = list(string)
-  default     = ["6938fd4d98bab03faadb97b34396831e3780aea1", "1c58a3a8518e8759bf075b76b750d4f2df264fcd"]
-}
-
-variable "allowed_oidc_subjects" {
-  description = "Exact GitHub OIDC subject claims allowed to assume the CI runner role (StringEquals, no wildcard). Includes the main branch ref plus the dev/staging environment subjects used by the workflows."
-  type        = list(string)
-  default = [
-    "repo:PabloP150/TicketResolve:ref:refs/heads/main",
-    "repo:PabloP150/TicketResolve:environment:dev",
-    "repo:PabloP150/TicketResolve:environment:staging",
-  ]
-}
+# NOTE (Delivery 5): OIDC provider / CI runner inputs were removed — those
+# resources now live in infra/bootstrap/ (CI prerequisites that survive a
+# main-workspace destroy).
 
 variable "tags" {
   description = "Additional tags merged onto every role and policy. The module adds Environment, ManagedBy and Module tags automatically."

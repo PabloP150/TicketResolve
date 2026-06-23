@@ -38,3 +38,14 @@ output "dns_name_servers" {
   description = "The four name servers for the delegated zone. SEND THESE (plus the subdomain) to the instructor so they can delegate the subdomain from the parent oyd.solid.com.gt zone."
   value       = aws_route53_zone.delegated.name_servers
 }
+
+# --- CI auth prerequisites (Delivery 5, Deliverable C) ----------------------
+output "ci_runner_role_arn" {
+  description = "ARN of the OIDC-assumable CI runner role. Set this as the AWS_CI_ROLE_ARN GitHub Actions variable used by the workflows' role-to-assume."
+  value       = aws_iam_role.ci_runner.arn
+}
+
+output "oidc_provider_arn" {
+  description = "ARN of the GitHub Actions OIDC provider."
+  value       = aws_iam_openid_connect_provider.github.arn
+}

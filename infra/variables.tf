@@ -24,12 +24,6 @@ variable "region" {
   default     = "us-east-1"
 }
 
-variable "github_repo" {
-  description = "GitHub repository in <org>/<repo> form. Used to scope the GitHub Actions OIDC trust policy on the CI runner role to this repository's subject claims (Delivery 5, Deliverable C)."
-  type        = string
-  default     = "PabloP150/TicketResolve"
-}
-
 variable "dns_subdomain" {
   description = "Delegated DNS subdomain the team controls for TLS (Delivery 5, Deliverable D). The public Route53 hosted zone for it is created in the bootstrap workspace; this workspace looks it up to issue the ACM certificate and create the custom-domain alias records."
   type        = string

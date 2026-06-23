@@ -96,7 +96,11 @@ This split (root-with-condition rather than naming each role) is what lets the
 ## 3. OIDC federation
 
 The GitHub Actions OIDC provider is provisioned as Terraform
-(`aws_iam_openid_connect_provider` in the `iam` module):
+(`aws_iam_openid_connect_provider`). It and the CI runner role live in the
+**bootstrap** workspace, not the main workspace: the CD pipeline assumes the CI
+runner role via OIDC, so both must survive a `terraform destroy` on main —
+otherwise the next clean-state CD run could not authenticate (same rationale as
+the state backend and the DNS zone):
 
 - **Issuer URL:** `https://token.actions.githubusercontent.com`
 - **Audience claim:** `sts.amazonaws.com`
@@ -105,7 +109,7 @@ The GitHub Actions OIDC provider is provisioned as Terraform
   `repo:PabloP150/TicketResolve:environment:dev`, and
   `repo:PabloP150/TicketResolve:environment:staging`. A PR from a fork (subject
   `repo:.../pull_request` or any other repo) cannot assume the role.
-- **CI runner role ARN:** `arn:aws:iam::010526283195:role/ticketresolve-dev-ci-runner`
+- **CI runner role ARN:** `arn:aws:iam::010526283195:role/ticketresolve-ci-runner` (in the bootstrap workspace)
 - **OIDC provider ARN:** `arn:aws:iam::010526283195:oidc-provider/token.actions.githubusercontent.com`
 
 **Workflow changes:** every workflow that runs `terraform plan/apply/destroy`

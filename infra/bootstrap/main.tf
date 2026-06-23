@@ -97,3 +97,78 @@ resource "aws_route53_zone" "delegated" {
     prevent_destroy = true
   }
 }
+
+# ===========================================================================
+# GitHub Actions OIDC provider + CI runner role (Delivery 5, Deliverable C).
+# These are CI PREREQUISITES: the CD pipeline assumes the ci_runner role via
+# OIDC, so the provider and role must exist BEFORE any pipeline run. They live
+# in the bootstrap workspace (not the main workspace) so a `terraform destroy`
+# on main never removes them — otherwise the very next clean-state CD run could
+# not authenticate. Same rationale as the state backend and the DNS zone.
+# Trust is scoped to this repo's exact subject claims (no wildcard subject).
+# ===========================================================================
+resource "aws_iam_openid_connect_provider" "github" {
+  url             = "https://token.actions.githubusercontent.com"
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = var.github_oidc_thumbprints
+
+  tags = merge(local.common_tags, { Component = "oidc" })
+}
+
+data "aws_iam_policy_document" "ci_runner_assume" {
+  statement {
+    sid     = "GitHubOIDCAssume"
+    effect  = "Allow"
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    principals {
+      type        = "Federated"
+      identifiers = [aws_iam_openid_connect_provider.github.arn]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:sub"
+      values   = var.allowed_oidc_subjects
+    }
+  }
+}
+
+resource "aws_iam_role" "ci_runner" {
+  name               = "${var.project_name}-ci-runner"
+  description        = "GitHub Actions CI runner role assumed via OIDC. Grants terraform plan/apply across all modules. Trust scoped to this repo's main branch + dev/staging environments only."
+  assume_role_policy = data.aws_iam_policy_document.ci_runner_assume.json
+
+  tags = merge(local.common_tags, { Component = "oidc" })
+}
+
+# Deploy permissions. A CI/CD role that runs `terraform apply` must create
+# resources that do not exist yet, so Resource is "*"; Actions are enumerated
+# per service (no "*" action) and the role is assumable ONLY from this repo.
+data "aws_iam_policy_document" "ci_runner" {
+  statement {
+    sid    = "ProvisionProjectResources"
+    effect = "Allow"
+    actions = [
+      "s3:*", "dynamodb:*", "lambda:*", "apigateway:*", "logs:*",
+      "iam:*", "kms:*", "secretsmanager:*", "sns:*", "sqs:*",
+      "scheduler:*", "cloudwatch:*", "budgets:*", "route53:*",
+      "acm:*", "cloudfront:*", "ec2:Describe*",
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "ci_runner" {
+  name        = "${var.project_name}-ci-runner"
+  description = "Permissions for the GitHub Actions CI runner to plan/apply all project modules."
+  policy      = data.aws_iam_policy_document.ci_runner.json
+}
+
+resource "aws_iam_role_policy_attachment" "ci_runner" {
+  role       = aws_iam_role.ci_runner.name
+  policy_arn = aws_iam_policy.ci_runner.arn
+}

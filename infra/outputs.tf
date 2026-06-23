@@ -200,13 +200,13 @@ output "secret_name" {
 # --- Delivery 5: IAM + OIDC (Deliverables A, C) ------------------------------
 
 output "ci_runner_role_arn" {
-  description = "ARN of the OIDC-assumable CI runner role. Referenced by the GitHub Actions workflows' role-to-assume input."
-  value       = module.iam.ci_runner_role_arn
+  description = "ARN of the OIDC-assumable CI runner role (provisioned in the bootstrap workspace). Referenced by the GitHub Actions workflows' role-to-assume input."
+  value       = local.ci_runner_role_arn
 }
 
 output "oidc_provider_arn" {
-  description = "ARN of the GitHub Actions OIDC provider provisioned via Terraform."
-  value       = module.iam.oidc_provider_arn
+  description = "ARN of the GitHub Actions OIDC provider (provisioned in the bootstrap workspace)."
+  value       = "arn:aws:iam::${local.account_id}:oidc-provider/token.actions.githubusercontent.com"
 }
 
 output "lambda_execution_role_arns" {
