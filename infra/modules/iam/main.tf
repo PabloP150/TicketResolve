@@ -381,6 +381,9 @@ data "aws_iam_policy_document" "ci_runner_assume" {
 }
 
 resource "aws_iam_role" "ci_runner" {
+  # NOTE: the root module reconstructs this exact ARN as a string in
+  # infra/locals.tf (ci_runner_role_arn) to break a dependency cycle with the
+  # KMS key policy. If you rename this role, update locals.tf to match.
   name               = "${local.name_prefix}-ci-runner"
   description        = "GitHub Actions CI runner role assumed via OIDC. Grants the permissions terraform plan/apply needs across all modules. Trust is scoped to this repo's main branch and dev/staging environments only."
   assume_role_policy = data.aws_iam_policy_document.ci_runner_assume.json

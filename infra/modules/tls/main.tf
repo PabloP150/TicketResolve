@@ -1,3 +1,5 @@
+data "aws_region" "current" {}
+
 locals {
   api_fqdn = "${var.api_subdomain_label}.${var.subdomain}"
   app_fqdn = "${var.app_subdomain_label}.${var.subdomain}"
@@ -42,6 +44,15 @@ resource "aws_acm_certificate" "this" {
 
   lifecycle {
     create_before_destroy = true
+
+    # CloudFront requires its viewer certificate in us-east-1. Since the same
+    # cert also serves the regional API Gateway custom domain, the whole module
+    # only works when the workspace region is us-east-1 — fail fast at plan time
+    # if that ever changes, instead of with an opaque error at apply.
+    precondition {
+      condition     = data.aws_region.current.name == "us-east-1"
+      error_message = "module.tls requires region us-east-1 (CloudFront viewer certificates must live there). Set var.region = \"us-east-1\" or disable enable_tls."
+    }
   }
 }
 

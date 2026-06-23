@@ -39,13 +39,7 @@ variable "flexible_time_window_minutes" {
   }
 }
 
-variable "environment" {
-  description = "Deployment environment (dev/staging/prod). Surfaced in tags."
-  type        = string
-}
-
-variable "tags" {
-  description = "Additional tags merged onto the IAM role created by this module (the schedule resource itself does not take free-form tags)."
-  type        = map(string)
-  default     = {}
-}
+# Note (Delivery 5): the old `environment` and `tags` inputs were removed — the
+# IAM role they tagged now lives in infra/modules/iam/, and aws_scheduler_schedule
+# does not accept free-form tags. The module's only remaining inputs are the
+# schedule definition plus the injected scheduler_role_arn.

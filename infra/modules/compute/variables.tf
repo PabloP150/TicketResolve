@@ -72,12 +72,6 @@ variable "reserved_concurrent_executions" {
   }
 }
 
-variable "log_retention_in_days" {
-  description = "Retention for the Lambda's CloudWatch log group. 14 days is enough for the academic project and stays inside the free tier of CloudWatch Logs ingestion."
-  type        = number
-  default     = 14
-}
-
 variable "tags" {
   description = "Additional tags to merge on every resource created by this module. The module adds Environment, ManagedBy, Module and FunctionName tags automatically."
   type        = map(string)

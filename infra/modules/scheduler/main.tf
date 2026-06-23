@@ -4,23 +4,12 @@
 # escalamiento Lambda that scans for open tickets past their SLA. This target
 # is DISTINCT from the async consumer (notificacion) per the Delivery 4 spec.
 #
-# The schedule has its own IAM role whose only permission is lambda:InvokeFunction
-# on the single target function ARN. That is narrower than the target Lambda's
-# own execution role (which can read/write DynamoDB): the scheduler may only
-# *invoke*, never touch data.
+# The schedule's IAM role (lambda:InvokeFunction scoped to the single target
+# function ARN — narrower than the target Lambda's own execution role) is now
+# defined centrally in infra/modules/iam/ and injected via var.scheduler_role_arn
+# (Delivery 5). This module only creates the schedule itself; aws_scheduler_schedule
+# does not take free-form tags, so this module declares none.
 # ===========================================================================
-
-locals {
-  module_tags = merge(var.tags, {
-    Environment = var.environment
-    ManagedBy   = "Terraform"
-    Module      = "scheduler"
-  })
-}
-
-# NOTE (Delivery 5): the scheduler's invoke role is now defined centrally in
-# infra/modules/iam/ (lambda:InvokeFunction scoped to the escalamiento ARN) and
-# injected via var.scheduler_role_arn. This module no longer creates the role.
 
 resource "aws_scheduler_schedule" "this" {
   name       = var.schedule_name

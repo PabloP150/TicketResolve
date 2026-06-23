@@ -373,11 +373,6 @@ module "sla_sweep_scheduler" {
   target_lambda_arn   = module.lambda_escalamiento.function_arn
   target_lambda_name  = module.lambda_escalamiento.function_name
   scheduler_role_arn  = module.iam.scheduler_role_arn
-  environment         = var.environment
-
-  tags = {
-    Application = var.app_name
-  }
 }
 
 # ---------------------------------------------------------------------------
