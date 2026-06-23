@@ -47,6 +47,12 @@ variable "force_destroy" {
   default     = false
 }
 
+variable "cors_allowed_origins" {
+  description = "Origins allowed to upload (PUT) and download (GET) objects DIRECTLY from the browser via presigned URLs. Needed for the SPA's attachment uploads, which are cross-origin (app.<domain> -> this bucket's S3 endpoint) and blocked without CORS. Empty list = no CORS configuration (server-side access only)."
+  type        = list(string)
+  default     = []
+}
+
 variable "tags" {
   description = "Additional tags to merge on the bucket. The module adds Environment, ManagedBy and Module tags automatically."
   type        = map(string)

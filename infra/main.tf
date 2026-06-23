@@ -65,6 +65,13 @@ module "attachments_bucket" {
   force_destroy = var.bucket_force_destroy
   kms_key_arn   = module.security_kms.kms_key_arn
 
+  # Allow the SPA to upload/download attachments cross-origin via presigned URLs.
+  # The app origin (only present with TLS) plus the local Vite dev/preview ports.
+  cors_allowed_origins = concat(
+    var.enable_tls ? ["https://${var.environment == "dev" ? "app" : "app-${var.environment}"}.${var.dns_subdomain}"] : [],
+    ["http://localhost:5173", "http://localhost:4173"],
+  )
+
   lifecycle_rules = [
     {
       id                       = "attachments-tier-down"

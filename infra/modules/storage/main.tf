@@ -45,6 +45,23 @@ resource "aws_s3_bucket_public_access_block" "this" {
   restrict_public_buckets = true
 }
 
+# Browser CORS — only created when cors_allowed_origins is non-empty (the
+# attachments bucket). Lets the SPA PUT a file to its presigned upload URL and
+# GET it back cross-origin. The presigned signature remains the security
+# boundary; CORS only tells the browser the cross-origin request is permitted.
+resource "aws_s3_bucket_cors_configuration" "this" {
+  count  = length(var.cors_allowed_origins) > 0 ? 1 : 0
+  bucket = aws_s3_bucket.this.id
+
+  cors_rule {
+    allowed_methods = ["GET", "PUT", "HEAD"]
+    allowed_origins = var.cors_allowed_origins
+    allowed_headers = ["*"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
+}
+
 resource "aws_s3_bucket_lifecycle_configuration" "this" {
   bucket = aws_s3_bucket.this.id
 
