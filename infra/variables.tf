@@ -30,6 +30,12 @@ variable "dns_subdomain" {
   default     = "grupo7.oyd.solid.com.gt"
 }
 
+variable "kms_admin_principal_arns" {
+  description = "Stable IAM principal ARNs (besides the CI runner role) allowed to administer the CMK, matched against aws:PrincipalArn. Defaults to the human operator user so both CI and a local operator can manage the key. Use ROLE/USER ARNs — never assumed-role session ARNs."
+  type        = list(string)
+  default     = ["arn:aws:iam::010526283195:user/Pablo-Pineda"]
+}
+
 variable "enable_tls" {
   description = "Whether to provision the TLS layer (ACM cert, API Gateway custom domain, CloudFront). Defaults to true (the committed config for the one-click proof). Set to false for an interim apply BEFORE the instructor's NS delegation is live, since ACM DNS validation would otherwise hang. Flip back to true once `dig NS grupo7.oyd.solid.com.gt` returns our name servers."
   type        = bool
