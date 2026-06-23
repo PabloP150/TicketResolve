@@ -189,6 +189,16 @@ data "aws_iam_policy_document" "compute_escalamiento" {
     resources = [var.queue_arn]
   }
   statement {
+    # The DynamoDB table is encrypted with the CMK, so the SLA sweep needs
+    # Decrypt to scan/read overdue tickets and GenerateDataKey to write the
+    # escalation transaction. Without this the sweep fails with KMS AccessDenied
+    # and no ticket is ever escalated (and no escalation email is sent).
+    sid       = "UseCMK"
+    effect    = "Allow"
+    actions   = ["kms:Decrypt", "kms:GenerateDataKey"]
+    resources = [var.kms_key_arn]
+  }
+  statement {
     sid       = "WriteOwnLogs"
     effect    = "Allow"
     actions   = ["logs:CreateLogStream", "logs:PutLogEvents"]
