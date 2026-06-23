@@ -1,7 +1,10 @@
 name: Terraform CD
 
-# Apply-on-merge with environment promotion:
-#   merge to main -> plan-dev -> apply-dev (auto) -> apply-staging (reviewer gate)
+# Apply-on-merge (dev) + manual staging promotion:
+#   merge to main -> plan-dev -> apply-dev (auto) -> deploy frontend + smoke test
+#   staging -> manual workflow_dispatch (environment=staging), reviewer-gated
+# Staging is intentionally NOT promoted on push, so consecutive merges never
+# queue behind an unresolved staging reviewer gate.
 #
 # Also exposed via workflow_dispatch with an `environment` input so the Slack
 # deployment bot (Delivery 5, Deliverable J) can trigger THIS same pipeline for a
@@ -140,11 +143,15 @@ jobs:
     name: Apply (staging)
     runs-on: ubuntu-latest
     needs: apply-dev
-    # On push: promote after dev succeeds. On dispatch: run when staging was
-    # requested, even though apply-dev was skipped (always() + skipped check).
+    # Staging is promoted ONLY via manual workflow_dispatch (environment=staging),
+    # never automatically on push. A push to main is a dev-only CD run that
+    # concludes green after the smoke test, so consecutive merges never queue
+    # behind an unresolved staging reviewer gate. The gate still protects the
+    # staging GitHub Environment on the dispatch path. apply-dev is skipped on a
+    # staging dispatch, so accept skipped too.
     if: |
       always() &&
-      (github.event_name == 'push' || inputs.environment == 'staging') &&
+      github.event_name == 'workflow_dispatch' && inputs.environment == 'staging' &&
       (needs.apply-dev.result == 'success' || needs.apply-dev.result == 'skipped')
     environment: staging
     steps:
