@@ -19,7 +19,6 @@ from typing import Any
 import boto3
 from boto3.dynamodb.conditions import Attr, Key
 from boto3.dynamodb.types import TypeSerializer
-
 from shared import ddb, events, ids, keys, models, s3
 
 logger = logging.getLogger(__name__)
@@ -59,6 +58,9 @@ def create_ticket(body: dict) -> tuple[dict, int]:
 
     if not title:
         raise models.ValidationError("'title' is required.")
+    if len(title.strip()) < 3:
+        raise models.ValidationError("'title' must be at least 3 characters long.")
+
     if not service_name:
         raise models.ValidationError("'service' is required.")
     if not description:
