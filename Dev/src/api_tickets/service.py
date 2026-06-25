@@ -364,7 +364,7 @@ def get_ticket(ticket_id: str) -> tuple[dict, int]:
         return att
 
     meta_out = _strip_ddb_keys(meta)
-    meta_out["comment_count"] = len(attachments)  # override count to match actual items
+    meta_out["comment_count"] = len(comments)  # override count to match actual items
     
     return {
         "meta": meta_out,
