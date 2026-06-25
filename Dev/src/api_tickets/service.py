@@ -19,6 +19,7 @@ from typing import Any
 import boto3
 from boto3.dynamodb.conditions import Attr, Key
 from boto3.dynamodb.types import TypeSerializer
+
 from shared import ddb, events, ids, keys, models, s3
 
 logger = logging.getLogger(__name__)
@@ -363,11 +364,8 @@ def get_ticket(ticket_id: str) -> tuple[dict, int]:
             att["created_at"] = item["created_at"]
         return att
 
-    meta_out = _strip_ddb_keys(meta)
-    meta_out["comment_count"] = len(comments)  # override count to match actual items
-    
     return {
-        "meta": meta_out,
+        "meta": _strip_ddb_keys(meta),
         "events": [_strip_ddb_keys(e) for e in events],
         "comments": [_strip_ddb_keys(c) for c in comments],
         "attachments": [_build_attachment(a) for a in attachments],
