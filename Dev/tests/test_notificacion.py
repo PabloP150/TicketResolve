@@ -141,7 +141,7 @@ def test_resolve_enqueues_event(aws_services):
         # Create a ticket through the real API
         create = lambda_handler(
             make_event("POST", "/api/v1/incidents",
-                       body={"title": "xyz", "description": "y", "severity": "P1",
+                       body={"title": "x", "description": "y", "severity": "P1",
                              "service": "payments"}),
             {},
         )

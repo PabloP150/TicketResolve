@@ -132,7 +132,7 @@ def test_dashboard_default_status_open(aws_services):
     handler = get_handler()
 
     assignee = "eng-default-status"
-    create_ticket(handler, title="Test1", service="s", description="d",
+    create_ticket(handler, title="T1", service="s", description="d",
                   severity="P2", assignee=assignee)
 
     # No status param — should default to OPEN
