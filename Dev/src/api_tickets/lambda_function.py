@@ -18,9 +18,9 @@ import logging
 import os
 import re
 
-from api_tickets import service
 from shared import http as httputil
 from shared.models import NotFoundError, ValidationError, VersionConflict
+from api_tickets import service
 
 # ---------------------------------------------------------------------------
 # Logging setup (level from env LOG_LEVEL, default INFO)
@@ -77,14 +77,6 @@ def lambda_handler(event: dict, context) -> dict:
             assignee = query_params.get("assignee", "")
             status = query_params.get("status", "OPEN")
             result, _ = service.list_dashboard(assignee, status)
-            limit = query_params.get("limit")
-            if limit is not None:
-                try:
-                    n = int(limit)
-                    if n >= 0:
-                        result["items"] = result["items"][:n]
-                except ValueError:
-                    pass
             return httputil.ok(result)
 
         # PATCH /api/v1/incidents/{id}/assignee — reassign ticket (US-06)
