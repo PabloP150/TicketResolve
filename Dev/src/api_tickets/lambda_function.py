@@ -7,7 +7,8 @@ Routes HTTP API v2 events to service functions by method + path.
 Routes handled:
   POST   /api/v1/webhooks/alerts             → ingest_alert        (US-02)
   POST   /api/v1/incidents                   → create_ticket        (US-01)
-  GET    /api/v1/incidents                   → list_dashboard
+  GET    /api/v1/incidents                   → list_dashboard (filtros: status, assignee,
+                                                  severity; paginación: limit, offset)
   GET    /api/v1/incidents/{id}              → get_ticket
   POST   /api/v1/incidents/{id}/comments     → add_comment
   PATCH  /api/v1/incidents/{id}              → update_status  (state machine: ACK/ESCALATED/RESOLVED)
@@ -76,7 +77,12 @@ def lambda_handler(event: dict, context) -> dict:
             query_params = httputil.get_query_params(event)
             assignee = query_params.get("assignee", "")
             status = query_params.get("status", "OPEN")
-            result, _ = service.list_dashboard(assignee, status)
+            severity = query_params.get("severity")
+            limit = query_params.get("limit")
+            offset = query_params.get("offset")
+            result, _ = service.list_dashboard(
+                assignee, status, severity=severity, limit=limit, offset=offset
+            )
             return httputil.ok(result)
 
         # PATCH /api/v1/incidents/{id}/assignee — reassign ticket (US-06)
