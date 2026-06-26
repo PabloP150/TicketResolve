@@ -199,9 +199,22 @@ def create_ticket(body: dict) -> tuple[dict, int]:
 # Dashboard  (US-03, PA-2)
 # ---------------------------------------------------------------------------
 
-def list_dashboard(assignee: str, status: str = models.DEFAULT_STATUS) -> tuple[dict, int]:
+def list_dashboard(
+    assignee: str,
+    status: str = models.DEFAULT_STATUS,
+    severity: str | None = None,
+    limit: str | int | None = None,
+    offset: str | int | None = None,
+) -> tuple[dict, int]:
     """
     Return tickets filtered by status, optionally scoped to a single assignee.
+
+    Optional query refinements (applied in-memory, after the status filter):
+      severity: one of models.SEVERITIES ("P0"/"P1"/"P2"). Invalid values raise
+        ValidationError (400), same pattern as create_ticket's severity check.
+      offset: items to skip, default 0. Must be a non-negative integer.
+      limit: max items to return after offset. Must be a non-negative integer.
+        Omitted/None means "no cap".
 
     With assignee (non-empty string):
       Query GSI1 (ASSIGN#<assignee> / STATUS#<s>#SLA#<t>) — O(result set),
@@ -238,6 +251,32 @@ def list_dashboard(assignee: str, status: str = models.DEFAULT_STATUS) -> tuple[
     _SCAN_MAX_ITEMS: int = 2000
 
     models.validate_status(status)
+
+    # --- Validate optional severity/limit/offset (mirrors create_ticket's pattern) ---
+    if severity is not None and severity != "":
+        models.validate_severity(severity)
+    else:
+        severity = None
+
+    if offset is None or offset == "":
+        offset = 0
+    else:
+        try:
+            offset = int(offset)
+        except (ValueError, TypeError):
+            raise models.ValidationError("'offset' must be an integer.")
+        if offset < 0:
+            raise models.ValidationError("'offset' must be >= 0.")
+
+    if limit is not None and limit != "":
+        try:
+            limit = int(limit)
+        except (ValueError, TypeError):
+            raise models.ValidationError("'limit' must be an integer.")
+        if limit < 0:
+            raise models.ValidationError("'limit' must be >= 0.")
+    else:
+        limit = None
 
     table = ddb.get_table()
 
@@ -299,6 +338,13 @@ def list_dashboard(assignee: str, status: str = models.DEFAULT_STATUS) -> tuple[
         }
         for item in raw_items
     ]
+
+    if severity:
+        items = [i for i in items if i.get("severity") == severity]
+
+    items = items[offset:]
+    if limit is not None:
+        items = items[:limit]
 
     return {"items": items}, 200
 
